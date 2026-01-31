@@ -1,0 +1,108 @@
+<view class="container">
+  <!-- Header Section -->
+  <view class="header-section">
+    <view class="user-profile">
+      <block wx:if="{{!hasUserInfo}}">
+        <view class="login-placeholder" bindtap="getUserProfile">
+          <view class="avatar-circle">
+            <text>未登录</text>
+          </view>
+          <view class="greeting">
+            <text class="h1">点击登录</text>
+            <text class="p">开启您的健康管理</text>
+          </view>
+        </view>
+      </block>
+      <block wx:else>
+        <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+        <view class="greeting">
+          <text class="h1">你好，{{userInfo.nickName}}</text>
+          <text class="p">祝您身体健康</text>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- Dashboard Stats -->
+  <view class="card dashboard">
+    <view class="card-header">
+      <text class="card-title">今日概览</text>
+      <text class="date-badge">{{todayDate}}</text>
+    </view>
+    <view class="stats-row">
+      <view class="stat-item">
+        <text class="stat-val">{{stats.pending}}</text>
+        <text class="stat-key">待服药</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-val success">{{stats.completed}}</text>
+        <text class="stat-key">已完成</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Schedule List -->
+  <view class="section-title">今日服药计划</view>
+  <view class="schedule-list">
+    <block wx:if="{{schedule.length === 0}}">
+      <view class="empty-state">
+        <text>今天没有服药计划</text>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="schedule-item" wx:for="{{schedule}}" wx:key="plan_id">
+        <view class="time-col">
+          <text class="time-text">{{item.time}}</text>
+          <view class="time-line"></view>
+        </view>
+        <view class="med-card {{item.status === 'taken' ? 'done' : ''}}">
+          <view class="med-info">
+            <text class="med-name" style="color: {{item.medication_color}}">{{item.medication_name}}</text>
+            <text class="med-dose">{{item.dosage}}{{item.medication_unit}}</text>
+          </view>
+          <view class="med-action">
+            <button 
+              class="btn-take {{item.status === 'taken' ? 'taken' : ''}}" 
+              bindtap="takeMedication" 
+              data-plan-id="{{item.plan_id}}"
+              data-medication-id="{{item.medication_id}}"
+            >
+              {{item.status === 'taken' ? '已服' : '打卡'}}
+            </button>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- Quick Actions -->
+  <view class="action-grid" id="guide-target-1">
+    <view class="action-card" bindtap="goToMedications">
+      <view class="icon-box blue">
+        <text>💊</text>
+      </view>
+      <view class="action-info">
+        <text class="action-name">我的药箱</text>
+        <text class="action-desc">管理药品与库存</text>
+      </view>
+      <view class="arrow">></view>
+    </view>
+  </view>
+
+  <!-- Spotlight Guide -->
+  <view class="guide-overlay" wx:if="{{showGuide}}">
+    <view class="guide-mask"></view>
+    <view class="guide-content" style="top: {{guidePosition.top}}px; left: {{guidePosition.left}}px;">
+      <view class="spotlight-circle"></view>
+      <view class="guide-text-box">
+        <text class="guide-title">{{guideSteps[currentStep].title}}</text>
+        <text class="guide-desc">{{guideSteps[currentStep].desc}}</text>
+        <view class="guide-actions">
+           <button class="btn-skip" bindtap="skipGuide">跳过</button>
+           <button class="btn-next" bindtap="nextGuideStep">{{currentStep === guideSteps.length - 1 ? '完成' : '下一步'}}</button>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

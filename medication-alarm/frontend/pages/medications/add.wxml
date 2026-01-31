@@ -1,0 +1,111 @@
+<view class="container">
+  <view class="card form-card">
+    <text class="form-header">添加新药品</text>
+    
+    <form bindsubmit="submitForm">
+      <!-- Name -->
+      <view class="input-group">
+        <text class="label">药品名称</text>
+        <input class="input-field" name="name" placeholder="例如: 优甲乐" placeholder-class="placeholder-style"/>
+      </view>
+
+      <!-- Dosage Section -->
+      <view class="input-group">
+        <text class="label">用量模式</text>
+        <view class="dosage-tabs">
+          <view class="tab {{dosageMode === 'fixed' ? 'active' : ''}}" bindtap="setModeFixed">
+            <text>固定用量</text>
+          </view>
+          <view class="tab {{dosageMode === 'alternate' ? 'active' : ''}}" bindtap="setModeAlternate">
+            <text>交替用量</text>
+          </view>
+        </view>
+
+        <!-- Fixed Mode -->
+        <view class="dosage-content" wx:if="{{dosageMode === 'fixed'}}">
+          <picker bindchange="onFixedDosageChange" value="{{fixedDosageIndex}}" range="{{dosageOptions}}">
+            <view class="picker-main {{fixedDosage ? 'has-value' : ''}}">
+              <text class="picker-value">{{fixedDosage || '请选择单次用量'}}</text>
+              <text class="picker-arrow">▼</text>
+            </view>
+          </picker>
+        </view>
+
+        <!-- Alternate Mode -->
+        <view class="dosage-content" wx:else>
+          <view class="alternate-timeline">
+            <block wx:for="{{alternateDosages}}" wx:key="index">
+              <view class="timeline-item">
+                <view class="timeline-node">{{index + 1}}</view>
+                <view class="timeline-content">
+                  <text class="timeline-label">第 {{index + 1}} 天</text>
+                  <picker bindchange="onAlternateDosageChange" data-index="{{index}}" range="{{dosageOptions}}">
+                    <view class="mini-picker {{item ? 'has-value' : ''}}">
+                      {{item || '选择用量'}}
+                    </view>
+                  </picker>
+                </view>
+                <view class="delete-icon" catchtap="removeAlternateStep" data-index="{{index}}" wx:if="{{alternateDosages.length > 2}}">
+                  ✕
+                </view>
+              </view>
+            </block>
+          </view>
+          <view class="add-cycle-btn" bindtap="addAlternateStep">
+            <text>+ 增加一天周期</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Unit -->
+      <view class="input-group">
+        <text class="label">单位</text>
+        <input class="input-field" name="unit" placeholder="例如：片、粒、ml" placeholder-class="placeholder" />
+      </view>
+
+      <!-- Reminder Time -->
+      <view class="input-group">
+        <text class="label">提醒时间</text>
+        <picker mode="time" value="{{reminderTime}}" bindchange="onTimeChange">
+          <view class="picker-main {{reminderTime ? 'has-value' : ''}}">
+            <text class="picker-value">{{reminderTime || '选择提醒时间'}}</text>
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- Color Selection -->
+      <view class="input-group">
+        <text class="label">颜色标记</text>
+        <view class="color-container">
+          <block wx:for="{{colors}}" wx:key="value">
+            <view 
+              class="color-circle-wrapper"
+              bindtap="selectColor"
+              data-color="{{item.value}}"
+            >
+              <view 
+                class="color-circle {{selectedColor === item.value ? 'selected' : ''}}" 
+                style="background-color: {{item.value}}"
+              >
+                <view wx:if="{{selectedColor === item.value}}" class="check-icon">✓</view>
+              </view>
+              <text class="color-name" wx:if="{{selectedColor === item.value}}">{{item.name}}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+
+      <!-- Stock -->
+      <view class="input-group">
+        <text class="label">当前库存</text>
+        <input class="input-field" name="stock" type="digit" placeholder="当前剩余数量" placeholder-class="placeholder-style"/>
+      </view>
+
+      <!-- Submit -->
+      <view class="footer-actions">
+        <button class="btn-primary" formType="submit">保存</button>
+      </view>
+    </form>
+  </view>
+</view>

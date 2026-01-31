@@ -1,0 +1,77 @@
+/** app.wxss **/
+page {
+  --primary-color: #4CAF50; /* Green - Health */
+  --primary-light: #E8F5E9;
+  --secondary-color: #2196F3; /* Blue - Calm */
+  --text-main: #2C3E50;
+  --text-secondary: #7F8C8D;
+  --bg-color: #F5F7FA;
+  --white: #FFFFFF;
+  --shadow: 0 8rpx 30rpx rgba(0,0,0,0.05);
+  --radius: 24rpx;
+
+  background-color: var(--bg-color);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei', sans-serif;
+  color: var(--text-main);
+  box-sizing: border-box;
+}
+
+.container {
+  padding: 30rpx;
+  min-height: 100vh;
+}
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 40rpx;
+  margin-bottom: 30rpx;
+  box-shadow: var(--shadow);
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #66BB6A 0%, #43A047 100%);
+  color: white;
+  border-radius: 50rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  box-shadow: 0 8rpx 20rpx rgba(76, 175, 80, 0.3);
+  border: none;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 10rpx rgba(76, 175, 80, 0.2);
+}
+
+.input-group {
+  margin-bottom: 30rpx;
+}
+
+.label {
+  display: block;
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  margin-bottom: 15rpx;
+}
+
+.input-field {
+  background: #F9FAFC;
+  border: 2rpx solid #E0E6ED;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  font-size: 30rpx;
+  transition: all 0.3s;
+}
+
+.input-field:focus {
+  border-color: var(--primary-color);
+  background: var(--white);
+}

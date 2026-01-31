@@ -1,0 +1,84 @@
+
+/* Guide Overlay */
+.guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.guide-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.guide-content {
+  position: absolute;
+  width: 100%;
+  pointer-events: none; /* Allow clicks to pass through to mask if needed, but here we want buttons to work */
+}
+
+.guide-text-box {
+  position: absolute;
+  top: 140rpx; /* Adjust based on target position relative to this container */
+  left: 40rpx;
+  right: 40rpx;
+  background: white;
+  padding: 40rpx;
+  border-radius: 20rpx;
+  pointer-events: auto;
+  animation: fadeIn 0.5s ease;
+}
+
+.guide-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #2C3E50;
+  margin-bottom: 20rpx;
+}
+
+.guide-desc {
+  display: block;
+  font-size: 28rpx;
+  color: #7F8C8D;
+  margin-bottom: 40rpx;
+  line-height: 1.6;
+}
+
+.guide-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20rpx;
+}
+
+.btn-skip {
+  background: transparent;
+  color: #95A5A6;
+  font-size: 28rpx;
+  border: none;
+}
+
+.btn-next {
+  background: #4CAF50;
+  color: white;
+  font-size: 28rpx;
+  padding: 10rpx 40rpx;
+  border-radius: 30rpx;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Highlight Effect - Simplified implementation */
+/* In a real scenario, we might use canvas or multiple divs to create a "hole" in the mask.
+   For this MVP, we just overlay the text box near the target. */

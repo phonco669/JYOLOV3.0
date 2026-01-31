@@ -1,0 +1,38 @@
+<view class="container">
+  <view class="header">
+    <text class="page-title">我的药品</text>
+    <view class="add-btn-wrapper" bindtap="goToAdd">
+      <text class="add-icon">+</text>
+      <text>添加</text>
+    </view>
+  </view>
+  
+  <view class="list-container">
+    <block wx:if="{{medications.length === 0}}">
+      <view class="empty-state">
+        <view class="empty-icon-circle">💊</view>
+        <text class="empty-title">还没有药品</text>
+        <text class="empty-desc">点击右上角添加您的第一个药品</text>
+        <button class="btn-primary mt-40" bindtap="goToAdd">立即添加</button>
+      </view>
+    </block>
+    
+    <block wx:else>
+      <block wx:for="{{medications}}" wx:key="id">
+        <view class="med-card">
+          <view class="med-color-strip" style="background-color: {{item.color || '#4CAF50'}}"></view>
+          <view class="med-content">
+            <view class="med-main">
+              <text class="med-name">{{item.name}}</text>
+              <text class="med-dosage">每次 {{item.dosage}} {{item.unit}}</text>
+            </view>
+            <view class="med-stock-info">
+              <text class="stock-label">剩余</text>
+              <text class="stock-num {{item.stock < 10 ? 'warning' : ''}}">{{item.stock}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </block>
+  </view>
+</view>

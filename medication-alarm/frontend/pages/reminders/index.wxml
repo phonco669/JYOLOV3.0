@@ -1,0 +1,73 @@
+<view class="container">
+  <view class="header">
+    <text class="title">提醒事项</text>
+    <text class="subtitle">管理您的所有健康提醒</text>
+  </view>
+
+  <view class="tabs">
+    <view class="tab-item {{activeTab === 'pending' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending">待办事项</view>
+    <view class="tab-item {{activeTab === 'completed' ? 'active' : ''}}" bindtap="switchTab" data-tab="completed">已完成</view>
+  </view>
+
+  <scroll-view scroll-y class="reminder-list">
+    <block wx:if="{{reminders.length === 0 && !loading}}">
+      <view class="empty-state">
+        <text>{{activeTab === 'pending' ? '暂无待办提醒' : '暂无已完成事项'}}</text>
+      </view>
+    </block>
+    
+    <block wx:else>
+      <view class="reminder-card {{item.type}}" wx:for="{{reminders}}" wx:key="id" bindtap="{{activeTab === 'pending' ? 'markDone' : ''}}" data-id="{{item.id}}" data-type="{{item.type}}">
+        <view class="card-left">
+          <view class="icon-box {{item.type}}">
+            <text wx:if="{{item.type === 'stock_low'}}">📦</text>
+            <text wx:elif="{{item.type === 'todo'}}">📝</text>
+            <text wx:else>⏰</text>
+          </view>
+          <view class="content">
+            <text class="card-title" style="{{activeTab === 'completed' ? 'text-decoration: line-through; color: #94A3B8;' : ''}}">{{item.title}}</text>
+            <text class="card-detail">{{item.detail}}</text>
+            <text class="card-time" wx:if="{{item.due_time}}">截止: {{item.due_time}}</text>
+          </view>
+        </view>
+        <view class="card-right">
+           <block wx:if="{{activeTab === 'pending'}}">
+             <view class="action-btn edit" catchtap="editTodo" data-item="{{item}}" wx:if="{{item.type === 'todo'}}">✏️</view>
+             <view class="priority-dot {{item.priority}}"></view>
+           </block>
+           <block wx:else>
+             <view class="action-btn undo" catchtap="undoComplete" data-id="{{item.id}}" data-type="{{item.type}}">↩️</view>
+           </block>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+
+  <view class="fab" bindtap="openAddModal" wx:if="{{activeTab === 'pending'}}">
+    <text>+</text>
+  </view>
+
+  <!-- Modal -->
+  <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
+  <view class="modal-content" wx:if="{{showModal}}">
+    <view class="modal-header">{{editingId ? '编辑待办' : '新建待办'}}</view>
+    <view class="form-group">
+      <input class="input" placeholder="标题" value="{{newTodo.title}}" data-field="title" bindinput="onInputChange" />
+    </view>
+    <view class="form-group">
+      <textarea class="textarea" placeholder="描述 (可选)" value="{{newTodo.description}}" data-field="description" bindinput="onInputChange"></textarea>
+    </view>
+    <view class="form-row">
+      <picker mode="date" value="{{newTodo.due_date}}" start="{{today}}" data-field="due_date" bindchange="onInputChange">
+        <view class="picker">{{newTodo.due_date || '选择日期'}}</view>
+      </picker>
+      <picker mode="time" value="{{newTodo.time}}" data-field="time" bindchange="onInputChange">
+        <view class="picker">{{newTodo.time || '选择时间'}}</view>
+      </picker>
+    </view>
+    <view class="modal-actions">
+      <button class="btn cancel" bindtap="closeModal">取消</button>
+      <button class="btn confirm" bindtap="submitTodo">保存</button>
+    </view>
+  </view>
+</view>

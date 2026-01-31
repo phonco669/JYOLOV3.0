@@ -1,0 +1,70 @@
+<view class="container">
+  <!-- Month Selector -->
+  <view class="calendar-header">
+    <view class="month-btn" bindtap="prevMonth">
+      <text class="arrow">◀</text>
+    </view>
+    <view class="current-month">{{year}}年{{month}}月</view>
+    <view class="month-btn" bindtap="nextMonth">
+      <text class="arrow">▶</text>
+    </view>
+  </view>
+
+  <!-- Weekday Headers -->
+  <view class="weekday-header">
+    <view class="weekday" wx:for="{{['日', '一', '二', '三', '四', '五', '六']}}" wx:key="*this">{{item}}</view>
+  </view>
+
+  <!-- Calendar Grid -->
+  <view class="calendar-grid">
+    <view class="day-cell {{item.isCurrentMonth ? '' : 'other-month'}} {{item.isToday ? 'today' : ''}} {{item.status}}" 
+          wx:for="{{days}}" 
+          wx:key="date"
+          bindtap="onDayClick"
+          data-date="{{item.date}}">
+      <text class="day-num">{{item.dayNum}}</text>
+      <view class="status-dot" wx:if="{{item.status !== 'none'}}"></view>
+    </view>
+  </view>
+
+  <!-- Legend -->
+  <view class="legend">
+    <view class="legend-item">
+      <view class="dot completed"></view>
+      <text>全部完成</text>
+    </view>
+    <view class="legend-item">
+      <view class="dot partial"></view>
+      <text>部分完成</text>
+    </view>
+    <view class="legend-item">
+      <view class="dot missed"></view>
+      <text>未完成</text>
+    </view>
+    <view class="legend-item">
+      <view class="dot pending"></view>
+      <text>待服药</text>
+    </view>
+  </view>
+
+  <!-- Selected Day Details -->
+  <view class="day-details" wx:if="{{selectedDate}}">
+    <view class="detail-header">
+      <text>{{selectedDate}} 服药详情</text>
+    </view>
+    <view class="detail-list">
+        <block wx:if="{{selectedDaySchedule.length === 0}}">
+            <view class="empty-msg">当日无服药记录</view>
+        </block>
+        <block wx:else>
+            <view class="detail-item" wx:for="{{selectedDaySchedule}}" wx:key="plan_id">
+                <view class="detail-time">{{item.time}}</view>
+                <view class="detail-info">
+                    <text class="detail-name" style="color: {{item.medication_color}}">{{item.medication_name}}</text>
+                    <text class="detail-status {{item.status}}">{{item.status === 'taken' ? '已服' : '未服'}}</text>
+                </view>
+            </view>
+        </block>
+    </view>
+  </view>
+</view>
