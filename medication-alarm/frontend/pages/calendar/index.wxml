@@ -4,46 +4,51 @@
     <view class="month-btn" bindtap="prevMonth">
       <text class="arrow">◀</text>
     </view>
-    <view class="current-month">{{year}}年{{month}}月</view>
+    <picker mode="date" fields="month" value="{{year}}-{{month}}" bindchange="onDateChange">
+      <view class="current-month">{{year}}年{{month}}月 ▾</view>
+    </picker>
     <view class="month-btn" bindtap="nextMonth">
       <text class="arrow">▶</text>
     </view>
   </view>
 
-  <!-- Weekday Headers -->
-  <view class="weekday-header">
-    <view class="weekday" wx:for="{{['日', '一', '二', '三', '四', '五', '六']}}" wx:key="*this">{{item}}</view>
-  </view>
+  <!-- Calendar Wrapper -->
+  <view class="calendar-wrapper" bindtouchstart="touchStart" bindtouchend="touchEnd">
+    <!-- Weekday Headers -->
+    <view class="weekday-header">
+      <view class="weekday" wx:for="{{['日', '一', '二', '三', '四', '五', '六']}}" wx:key="*this">{{item}}</view>
+    </view>
 
-  <!-- Calendar Grid -->
-  <view class="calendar-grid">
-    <view class="day-cell {{item.isCurrentMonth ? '' : 'other-month'}} {{item.isToday ? 'today' : ''}} {{item.status}}" 
-          wx:for="{{days}}" 
-          wx:key="date"
-          bindtap="onDayClick"
-          data-date="{{item.date}}">
-      <text class="day-num">{{item.dayNum}}</text>
-      <view class="status-dot" wx:if="{{item.status !== 'none'}}"></view>
+    <!-- Calendar Grid -->
+    <view class="calendar-grid {{animClass}}">
+      <view class="day-cell {{item.isCurrentMonth ? '' : 'other-month'}} {{item.isToday ? 'today' : ''}} {{item.status}} {{selectedDate === item.date ? 'selected' : ''}}" 
+            wx:for="{{days}}" 
+            wx:key="date"
+            bindtap="onDayClick"
+            data-date="{{item.date}}">
+        <text class="day-num">{{item.dayNum}}</text>
+        <view class="status-dot" wx:if="{{item.status !== 'none'}}"></view>
+      </view>
     </view>
-  </view>
 
-  <!-- Legend -->
-  <view class="legend">
-    <view class="legend-item">
-      <view class="dot completed"></view>
-      <text>全部完成</text>
-    </view>
-    <view class="legend-item">
-      <view class="dot partial"></view>
-      <text>部分完成</text>
-    </view>
-    <view class="legend-item">
-      <view class="dot missed"></view>
-      <text>未完成</text>
-    </view>
-    <view class="legend-item">
-      <view class="dot pending"></view>
-      <text>待服药</text>
+    <!-- Legend -->
+    <view class="legend">
+      <view class="legend-item">
+        <view class="dot completed"></view>
+        <text>全部完成</text>
+      </view>
+      <view class="legend-item">
+        <view class="dot partial"></view>
+        <text>部分完成</text>
+      </view>
+      <view class="legend-item">
+        <view class="dot missed"></view>
+        <text>未完成</text>
+      </view>
+      <view class="legend-item">
+        <view class="dot pending"></view>
+        <text>待服药</text>
+      </view>
     </view>
   </view>
 
@@ -60,11 +65,15 @@
             <view class="detail-item" wx:for="{{selectedDaySchedule}}" wx:key="plan_id">
                 <view class="detail-time">{{item.time}}</view>
                 <view class="detail-info">
-                    <text class="detail-name" style="color: {{item.medication_color}}">{{item.medication_name}}</text>
-                    <text class="detail-status {{item.status}}">{{item.status === 'taken' ? '已服' : '未服'}}</text>
+                    <view class="name-dosage">
+                        <text class="detail-name" style="color: {{item.medication_color}}">{{item.medication_name}}</text>
+                        <text class="detail-dosage">{{item.dosage}}{{item.medication_unit}}</text>
+                    </view>
+                    <text class="detail-status {{item.status}}">{{item.status === 'taken' ? '已服' : (item.status === 'missed' ? '未服' : '待服')}}</text>
                 </view>
             </view>
         </block>
     </view>
   </view>
+  <spotlight-guide id="spotlight" />
 </view>

@@ -3,6 +3,7 @@ import { MedicationModel } from '../models/Medication';
 import { PlanModel } from '../models/Plan';
 import { TodoModel } from '../models/Todo';
 import { RecordModel } from '../models/Record';
+import { FollowUpModel } from '../models/FollowUp';
 
 const getUserId = (req: Request): number | null => {
   const userId = req.headers['x-user-id'];
@@ -10,23 +11,24 @@ const getUserId = (req: Request): number | null => {
 };
 
 export const getReminders = async (req: Request, res: Response) => {
+  console.log("DEBUG: getReminders called - UPDATED VERSION");
   const userId = getUserId(req);
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
     const reminders: any[] = [];
     const today = new Date().toISOString().split('T')[0];
+    const nowTime = new Date().toTimeString().split(' ')[0].substring(0, 5); // HH:MM
 
     // 1. Low Stock Reminders
     const medications = await MedicationModel.findAllByUserId(userId);
     medications.forEach(med => {
-      // Simple threshold for now
       if (med.stock <= 10) {
         reminders.push({
           id: `stock-${med.id}`,
           type: 'stock_low',
-          title: `Low Stock: ${med.name}`,
-          detail: `Only ${med.stock} ${med.unit} left.`,
+          title: `库存不足: ${med.name}`,
+          detail: `仅剩 ${med.stock} ${med.unit}`,
           priority: 'medium',
           created_at: today
         });
@@ -43,49 +45,93 @@ export const getReminders = async (req: Request, res: Response) => {
           title: todo.title,
           detail: todo.description,
           due_time: todo.due_date,
-          priority: 'high', // Assume user todos are high priority
+          priority: 'high',
           created_at: todo.created_at
         });
       }
     });
 
-    // 3. Upcoming Plans (Today) - Check if not taken
-    // This overlaps with "Daily Schedule", but reminders view might show "Missed" or "Due Soon" specifically.
-    // For simplicity, let's skip duplicating daily schedule here unless it's "Overdue".
-    // Or we can just include "Today's Medication Plan" as a summary.
-    
-    // Let's list missed medications from yesterday?
-    // Or just leave medication reminders to the main dashboard and use this for "alerts".
-    
-    // Let's add "Overdue" medications from today (if current time > scheduled time).
+    // 3. Follow-ups
+    const followUps = await FollowUpModel.findAllByUserId(userId);
+    followUps.forEach(fu => {
+      if (fu.status === 'pending' && fu.date <= today) {
+        reminders.push({
+          id: `followup-${fu.id}`,
+          type: 'follow_up',
+          title: `复诊提醒: ${fu.doctor}`,
+          detail: `${fu.date} ${fu.time} @ ${fu.location}`,
+          due_time: `${fu.date} ${fu.time}`,
+          priority: 'high',
+          created_at: fu.created_at
+        });
+      }
+    });
+
+    // 4. Medication Reminders (Upcoming & Missed)
     const plans = await PlanModel.findAllByUserId(userId);
     const activePlans = plans.filter(p => p.start_date <= today && (!p.end_date || p.end_date >= today));
-    
-    // We need to check if they are taken.
     const records = await RecordModel.findAllByUserId(userId);
     const todayRecords = records.filter(r => r.taken_at.startsWith(today));
-    
-    const nowTime = new Date().toTimeString().split(' ')[0].substring(0, 5); // HH:MM
 
     activePlans.forEach(plan => {
-        const times = plan.time.split(','); // "08:00,12:00"
-        times.forEach((time: string) => {
-            // Check if there is a record for this plan/medication at this time (roughly)
-            // Ideally record should link to specific time slot. 
-            // Current Record model doesn't store "scheduled_time", just "taken_at".
-            // We can approximate or just check count.
-            
-            // Simplified: If plan has 2 times, and 1 record, we don't know which one is taken.
-            // But we can check if current time > time and count of records < index of time?
-            // Too complex for now.
-            
-            // Let's just alert if NO records for today and time > nowTime (actually if time < nowTime and NOT taken)
-            if (time < nowTime) {
-                // It's past due. Check if taken.
-                // We don't have exact matching. 
-                // Let's skip granular "Overdue" logic for now to avoid false positives.
+      // Find medication name
+      const med = medications.find(m => m.id === plan.medication_id);
+      if (!med) return;
+
+      const times = plan.time.split(',').filter(t => t.trim()); // "08:00,12:00"
+      
+      // Get records for this plan today
+      const recordsForPlan = todayRecords.filter(r => r.plan_id === plan.id);
+      // We assume records are chronological matching slots for now (simple logic)
+      // takenCount is how many doses have been taken today
+      const takenCount = recordsForPlan.length;
+
+      times.forEach((time, index) => {
+         const isTaken = index < takenCount; // Simple slot matching: 1st time matches 1st record
+         
+         if (time > nowTime) {
+             // Future: Upcoming
+             if (!isTaken) { // Only show if not already taken early (rare but possible)
+                 reminders.push({
+                        id: `med-upcoming-${plan.id}-${time}`,
+                        type: 'medication_upcoming',
+                        title: `服药提醒: ${med.name}`,
+                        detail: `${med.dosage} ${med.unit}`,
+                        due_time: time,
+                        priority: 'high',
+                        medication_color: med.color,
+                        created_at: today,
+                        medication_id: med.id,
+                        plan_id: plan.id,
+                        dosage: `${med.dosage} ${med.unit}`
+                    });
+                }
+            } else {
+                // Past: Missed?
+                if (!isTaken) {
+                    reminders.push({
+                        id: `med-missed-${plan.id}-${time}`,
+                        type: 'medication_missed',
+                        title: `漏服提醒: ${med.name}`,
+                        detail: `您错过了 ${time} 的服药计划`,
+                        due_time: time,
+                        priority: 'urgent',
+                        medication_color: med.color,
+                        created_at: today,
+                        medication_id: med.id,
+                        plan_id: plan.id,
+                        dosage: `${med.dosage} ${med.unit}`
+                    });
+                }
             }
-        });
+      });
+    });
+
+    // Sort all by due_time / created_at
+    reminders.sort((a, b) => {
+        const timeA = a.due_time || '23:59'; // stock reminders don't have due_time
+        const timeB = b.due_time || '23:59';
+        return timeA.localeCompare(timeB);
     });
 
     res.json(reminders);

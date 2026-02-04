@@ -1,0 +1,96 @@
+<view class="container">
+  <view class="header">
+    <text class="title">健康统计</text>
+    <view class="filter-section" bindtap="toggleFilter">
+        <text class="subtitle">{{filterLabel}}</text>
+        <text class="filter-icon">▼</text>
+    </view>
+  </view>
+
+  <!-- Filter Modal/Dropdown -->
+  <view class="filter-overlay" wx:if="{{showFilter}}" bindtap="toggleFilter"></view>
+  <view class="filter-menu" wx:if="{{showFilter}}">
+      <view class="filter-item {{rangeType === '30days' ? 'active' : ''}}" data-type="30days" bindtap="selectRange">近30天</view>
+      <view class="filter-item {{rangeType === 'year' ? 'active' : ''}}" data-type="year" bindtap="selectRange">本年</view>
+      <view class="filter-item {{rangeType === 'custom' ? 'active' : ''}}" data-type="custom" bindtap="selectRange">自定义范围</view>
+      
+      <view class="custom-range" wx:if="{{rangeType === 'custom'}}">
+          <view class="date-pickers">
+            <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange" class="picker-wrapper">
+                <view class="picker-input {{startDate ? '' : 'placeholder'}}">{{startDate || '开始日期'}}</view>
+            </picker>
+            <text class="range-separator">至</text>
+            <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange" class="picker-wrapper">
+                <view class="picker-input {{endDate ? '' : 'placeholder'}}">{{endDate || '结束日期'}}</view>
+            </picker>
+          </view>
+          <view class="btn-confirm" bindtap="applyCustomFilter">查询</view>
+      </view>
+  </view>
+
+  <block wx:if="{{!loading && stats}}">
+    <!-- Overview Card -->
+    <view class="card overview-card">
+      <view class="chart-container">
+        <view class="circle-chart" style="background: conic-gradient(#4CAF50 {{stats.overview.percentage}}%, #E2E8F0 0);">
+          <view class="inner-circle">
+            <text class="percentage">{{stats.overview.percentage}}%</text>
+            <text class="label">服药率</text>
+          </view>
+        </view>
+      </view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="value">{{stats.overview.totalTaken}}</text>
+          <text class="label">已服用</text>
+        </view>
+        <view class="stat-item">
+          <text class="value">{{stats.overview.totalExpected}}</text>
+          <text class="label">计划服用</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Daily Trend -->
+    <view class="card trend-card">
+      <view class="card-title">每日趋势</view>
+      <scroll-view scroll-x class="bar-chart-scroll" scroll-into-view="{{toView}}" scroll-with-animation>
+        <view class="bar-chart">
+            <view class="bar-group" wx:for="{{stats.daily}}" wx:key="date" id="day-{{index}}">
+                <view class="bar-container">
+                    <view class="bar {{item.isPerfect ? 'perfect' : ''}}" style="height: {{item.height}}%;"></view>
+                </view>
+                <text class="bar-label">{{item.displayDate}}</text>
+            </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- Body State Trend (Weight) -->
+    <view class="card trend-card" wx:if="{{stats.bodyStates && stats.bodyStates.length > 0}}">
+      <view class="card-title">体重趋势 (kg)</view>
+      <scroll-view scroll-x class="bar-chart-scroll">
+        <view class="bar-chart">
+            <view class="bar-group" wx:for="{{stats.bodyStates}}" wx:key="record_date">
+                <view class="bar-container">
+                    <view class="bar weight-bar" style="height: {{item.weightHeight}}%;"></view>
+                </view>
+                <text class="bar-value">{{item.weight}}</text>
+                <text class="bar-label">{{item.displayDate}}</text>
+            </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- Actions -->
+    <button class="btn-primary" bindtap="exportPDF">
+        📄 导出健康报告 (PDF)
+    </button>
+
+  </block>
+  
+  <view class="loading" wx:else>
+    <text>加载中...</text>
+  </view>
+  <spotlight-guide id="spotlight" />
+</view>

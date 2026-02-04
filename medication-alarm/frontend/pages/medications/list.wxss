@@ -94,6 +94,13 @@
   align-items: center;
 }
 
+.med-edit-icon {
+  font-size: 32rpx;
+  color: var(--text-secondary);
+  padding: 10rpx;
+  margin-left: 10rpx;
+}
+
 .med-main {
   display: flex;
   flex-direction: column;

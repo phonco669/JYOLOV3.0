@@ -1,12 +1,12 @@
 <view class="container">
   <view class="card form-card">
-    <text class="form-header">添加新药品</text>
+    <text class="form-header">{{isEditing ? '修改药品' : '添加新药品'}}</text>
     
     <form bindsubmit="submitForm">
       <!-- Name -->
       <view class="input-group">
         <text class="label">药品名称</text>
-        <input class="input-field" name="name" placeholder="例如: 优甲乐" placeholder-class="placeholder-style"/>
+        <input class="input-field" name="name" value="{{name}}" placeholder="例如: 优甲乐" placeholder-class="placeholder-style"/>
       </view>
 
       <!-- Dosage Section -->
@@ -60,7 +60,18 @@
       <!-- Unit -->
       <view class="input-group">
         <text class="label">单位</text>
-        <input class="input-field" name="unit" placeholder="例如：片、粒、ml" placeholder-class="placeholder" />
+        <input class="input-field" name="unit" value="{{unit}}" placeholder="例如：片、粒、ml" placeholder-class="placeholder" />
+      </view>
+
+      <!-- Start Date -->
+      <view class="input-group">
+        <text class="label">生效日期</text>
+        <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+          <view class="picker-main has-value">
+            <text class="picker-value">{{startDate}}</text>
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
       </view>
 
       <!-- Reminder Time -->
@@ -99,13 +110,14 @@
       <!-- Stock -->
       <view class="input-group">
         <text class="label">当前库存</text>
-        <input class="input-field" name="stock" type="digit" placeholder="当前剩余数量" placeholder-class="placeholder-style"/>
+        <input class="input-field" name="stock" value="{{stock}}" type="digit" placeholder="当前剩余数量" placeholder-class="placeholder-style"/>
       </view>
 
       <!-- Submit -->
       <view class="footer-actions">
-        <button class="btn-primary" formType="submit">保存</button>
+        <button class="btn-primary" formType="submit" id="med-submit-btn">{{isEditing ? '保存修改' : '保存'}}</button>
       </view>
     </form>
   </view>
+  <spotlight-guide id="spotlight" bind:next="onGuideNext" />
 </view>

@@ -1,3 +1,5 @@
+const { API_BASE } = require('./config.js');
+
 App({
   onLaunch() {
     this.login();
@@ -10,7 +12,7 @@ App({
       success: res => {
         // Send the code to your backend with an HTTP request
         wx.request({
-          url: 'http://localhost:3000/api/auth/login', 
+          url: `${API_BASE}/auth/login`, 
           method: 'POST',
           data: {
             code: res.code
@@ -20,6 +22,9 @@ App({
              if (response.data.token) {
                  this.globalData.token = response.data.token;
                  this.globalData.user = response.data.user;
+                 if (this.userLoginCallback) {
+                   this.userLoginCallback(response.data.user);
+                 }
              }
           },
           fail: (err) => {

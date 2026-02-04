@@ -50,7 +50,7 @@ async function runTest() {
 
     // 3. Get Schedule (Should be pending)
     console.log('3. Checking Schedule (Pending)...');
-    const scheduleRes1 = await fetch(`${API_BASE}/plans/schedule?date=${today}`, { headers });
+    const scheduleRes1 = await fetch(`${API_BASE}/plans/daily?date=${today}`, { headers });
     const schedule1 = await scheduleRes1.json();
     const item1 = schedule1.find((s: any) => s.plan_id === plan.id);
     if (!item1 || item1.status !== 'pending') throw new Error(`Schedule check failed: status is ${item1?.status}`);
@@ -75,7 +75,7 @@ async function runTest() {
 
     // 5. Verify Schedule (Taken) & Stock
     console.log('5. Checking Schedule (Taken) & Stock...');
-    const scheduleRes2 = await fetch(`${API_BASE}/plans/schedule?date=${today}`, { headers });
+    const scheduleRes2 = await fetch(`${API_BASE}/plans/daily?date=${today}`, { headers });
     const schedule2 = await scheduleRes2.json();
     const item2 = schedule2.find((s: any) => s.plan_id === plan.id);
     if (!item2 || item2.status !== 'taken') throw new Error(`Schedule check failed: status is ${item2?.status}`);
@@ -97,7 +97,7 @@ async function runTest() {
 
     // 7. Verify Schedule (Pending) & Stock Restored
     console.log('7. Checking Schedule (Pending) & Stock Restored...');
-    const scheduleRes3 = await fetch(`${API_BASE}/plans/schedule?date=${today}`, { headers });
+    const scheduleRes3 = await fetch(`${API_BASE}/plans/daily?date=${today}`, { headers });
     const schedule3 = await scheduleRes3.json();
     const item3 = schedule3.find((s: any) => s.plan_id === plan.id);
     if (!item3 || item3.status !== 'pending') throw new Error(`Schedule check failed: status is ${item3?.status}`);

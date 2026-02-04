@@ -1,11 +1,13 @@
 import express from 'express';
-import { listPlans, createPlan, getDailySchedule, getMonthlyStatus } from '../controllers/planController';
+import { createPlan, listPlans, getDailySchedule, getMonthlyStatus, getPlansByMedication, updatePlan } from '../controllers/planController';
 
 const router = express.Router();
 
-router.get('/', listPlans);
-router.get('/schedule', getDailySchedule);
-router.get('/monthly', getMonthlyStatus);
 router.post('/', createPlan);
+router.get('/', listPlans);
+router.put('/:id', updatePlan);
+router.get('/daily', getDailySchedule);
+router.get('/monthly', getMonthlyStatus);
+router.get('/medication/:medId', getPlansByMedication);
 
 export default router;

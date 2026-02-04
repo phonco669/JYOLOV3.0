@@ -1,4 +1,6 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "spotlight-guide": "/components/spotlight-guide/index"
+  },
   "navigationBarTitleText": "我的药品"
 }

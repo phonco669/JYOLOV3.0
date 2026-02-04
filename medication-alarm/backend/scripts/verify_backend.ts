@@ -84,7 +84,7 @@ const runTests = async () => {
     // 6. Get Daily Schedule
     console.log('\n6. Fetching Daily Schedule...');
     const today = new Date().toISOString().split('T')[0];
-    const scheduleRes: any = await request('GET', `/plans/schedule?date=${today}`);
+    const scheduleRes: any = await request('GET', `/plans/daily?date=${today}`);
     console.log('Daily Schedule:', JSON.stringify(scheduleRes.data, null, 2));
 
     // 7. Get Monthly Status
@@ -112,22 +112,22 @@ const runTests = async () => {
   const remindersRes: any = await request('GET', '/reminders');
   console.log('Reminders:', JSON.stringify(remindersRes.data, null, 2));
 
-  // 10. Delete Record (Undo Take)
+  // 10. Undo Take
   console.log('\n10. Deleting Record (Undo Take)...');
-  const deleteRes: any = await request('DELETE', `/records/${recordRes.data.id}`);
-  console.log('Delete Status:', deleteRes.status);
+  const delRes: any = await request('DELETE', `/records/${recordRes.data.id}`);
+  console.log('Delete Status:', delRes.status);
   
-  // Verify schedule again to see if it's pending
   console.log('Verifying Schedule Reversion...');
-  const scheduleRes2: any = await request('GET', `/plans/schedule?date=${today}`);
-  // Check if the plan status is 'pending'
-  const planInSchedule = scheduleRes2.data.find((p: any) => p.plan_id === planRes.data.id);
-  console.log('Plan Status after delete:', planInSchedule ? planInSchedule.status : 'Not found');
+  const scheduleRes2: any = await request('GET', `/plans/daily?date=${today}`);
+  const item2 = scheduleRes2.data.find((i: any) => i.plan_id === planRes.data.id);
+  if (item2 && item2.status === 'pending') {
+    console.log('✅ Schedule reverted to pending.');
+  } else {
+    console.error('❌ Schedule failed to revert', item2);
+  }
 
-  console.log('\nVerification finished successfully!');
-
-} catch (err) {
-    console.error('Test failed:', err);
+  } catch (error) {
+    console.error('Test failed:', error);
   }
 };
 

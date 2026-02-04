@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "服药日历",
-  "enablePullDownRefresh": true
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "spotlight-guide": "../../components/spotlight-guide/index"
+  }
 }

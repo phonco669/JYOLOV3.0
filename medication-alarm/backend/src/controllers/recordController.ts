@@ -50,13 +50,19 @@ export const createRecord = async (req: Request, res: Response) => {
   const { medication_id, plan_id, taken_at, status, dosage_taken } = req.body;
 
   try {
+    // Fetch medication details for snapshot
+    const medication = await MedicationModel.findById(medication_id);
+    
     const newRecord = await RecordModel.create({
       user_id: userId,
       medication_id,
       plan_id,
       taken_at: taken_at || new Date().toISOString(),
       status,
-      dosage_taken
+      dosage_taken,
+      medication_name: medication?.name || 'Unknown',
+      medication_unit: medication?.unit || '',
+      medication_color: medication?.color || '#ccc'
     });
 
     // Auto-deduct stock if taken

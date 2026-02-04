@@ -1,0 +1,41 @@
+<view class="container">
+  <view class="form-group">
+    <view class="label">日期</view>
+    <picker mode="date" value="{{date}}" bindchange="onDateChange">
+      <view class="picker">{{date}}</view>
+    </picker>
+  </view>
+
+  <view class="form-group">
+    <view class="label">症状/感受</view>
+    <textarea 
+      class="input-area" 
+      placeholder="今天感觉怎么样？有没有不舒服？" 
+      bindinput="onSymptomInput"
+      value="{{symptom}}"
+    />
+  </view>
+
+  <view class="form-group">
+    <view class="label">体重 (kg)</view>
+    <input 
+      class="input" 
+      type="digit" 
+      placeholder="0.0" 
+      bindinput="onWeightInput"
+      value="{{weight}}"
+    />
+  </view>
+
+  <view class="form-group">
+    <view class="label">备注</view>
+    <textarea 
+      class="input-area" 
+      placeholder="其他需要记录的信息..." 
+      bindinput="onNoteInput"
+      value="{{note}}"
+    />
+  </view>
+
+  <button class="submit-btn" bindtap="submitForm">保存记录</button>
+</view>

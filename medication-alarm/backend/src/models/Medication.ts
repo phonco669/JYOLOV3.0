@@ -51,6 +51,29 @@ export class MedicationModel {
     });
   }
 
+  static findById(id: number): Promise<Medication | undefined> {
+    return new Promise((resolve, reject) => {
+      db.get('SELECT * FROM medications WHERE id = ?', [id], (err, row) => {
+        if (err) reject(err);
+        else resolve(row as Medication);
+      });
+    });
+  }
+
+  static update(id: number, updates: Partial<Medication>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const { name, dosage, unit, color, stock } = updates;
+      db.run(
+        'UPDATE medications SET name = ?, dosage = ?, unit = ?, color = ?, stock = ? WHERE id = ?',
+        [name, dosage, unit, color, stock, id],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
   // Add update/delete later if needed
   static updateStock(id: number, quantity: number): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -59,6 +82,15 @@ export class MedicationModel {
             if (err) reject(err);
             else resolve();
         });
+    });
+  }
+
+  static delete(id: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      db.run('DELETE FROM medications WHERE id = ?', [id], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
   }
 }

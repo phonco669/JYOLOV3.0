@@ -4,7 +4,9 @@
     "pages/reminders/index",
     "pages/calendar/index",
     "pages/medications/list",
-    "pages/medications/add"
+    "pages/medications/add",
+    "pages/body-state/add",
+    "pages/statistics/index"
   ],
   "window": {
     "navigationBarTitleText": "服药提醒",
@@ -29,6 +31,10 @@
       {
         "pagePath": "pages/calendar/index",
         "text": "日历"
+      },
+      {
+        "pagePath": "pages/statistics/index",
+        "text": "统计"
       }
     ]
   },

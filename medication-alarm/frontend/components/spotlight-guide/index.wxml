@@ -1,0 +1,23 @@
+<view class="guide-overlay" wx:if="{{visible}}" catchtouchmove="preventTouchMove">
+  <!-- Four transparent blocks around the target to create a "hole" -->
+  <view class="mask mask-top" style="height: {{targetRect.top}}px" bindtap="dismiss"></view>
+  <view class="mask mask-bottom" style="top: {{targetRect.bottom}}px" bindtap="dismiss"></view>
+  <view class="mask mask-left" style="top: {{targetRect.top}}px; height: {{targetRect.height}}px; width: {{targetRect.left}}px" bindtap="dismiss"></view>
+  <view class="mask mask-right" style="top: {{targetRect.top}}px; height: {{targetRect.height}}px; left: {{targetRect.right}}px" bindtap="dismiss"></view>
+
+  <!-- The "Hole" Border/Highlight -->
+  <view class="highlight-box" style="top: {{targetRect.top}}px; left: {{targetRect.left}}px; width: {{targetRect.width}}px; height: {{targetRect.height}}px">
+    <view class="pulse-ring"></view>
+  </view>
+
+  <!-- Tooltip -->
+  <view class="tooltip {{tooltipPosition}}" style="top: {{tooltipTop}}px; left: {{tooltipLeft}}px" catchtap="doNothing">
+    <view class="tooltip-content">
+      <text class="tooltip-text">{{content}}</text>
+      <view class="tooltip-footer" wx:if="{{!noNext}}">
+        <view class="btn-next" bindtap="onNext">下一步</view>
+      </view>
+      <view class="tooltip-arrow {{tooltipPosition}}"></view>
+    </view>
+  </view>
+</view>

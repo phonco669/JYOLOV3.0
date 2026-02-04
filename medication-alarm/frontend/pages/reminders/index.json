@@ -1,3 +1,6 @@
 {
+  "usingComponents": {
+    "spotlight-guide": "../../components/spotlight-guide/index"
+  },
   "navigationBarTitleText": "提醒管理"
 }

@@ -1,4 +1,6 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "spotlight-guide": "../../components/spotlight-guide/index"
+  },
   "navigationBarTitleText": "添加药品"
 }

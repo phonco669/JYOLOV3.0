@@ -51,6 +51,38 @@ export class PlanModel {
       );
     });
   }
+
+  static findByMedicationId(medicationId: number): Promise<Plan[]> {
+    return new Promise((resolve, reject) => {
+      db.all('SELECT * FROM plans WHERE medication_id = ?', [medicationId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows as Plan[]);
+      });
+    });
+  }
+
+  static findById(id: number): Promise<Plan | undefined> {
+    return new Promise((resolve, reject) => {
+      db.get('SELECT * FROM plans WHERE id = ?', [id], (err, row) => {
+        if (err) reject(err);
+        else resolve(row as Plan);
+      });
+    });
+  }
+
+  static update(id: number, updates: Partial<Plan>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const { time, frequency, start_date, end_date } = updates;
+      db.run(
+        'UPDATE plans SET time = ?, frequency = ?, start_date = ?, end_date = ? WHERE id = ?',
+        [time, frequency, start_date, end_date, id],
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
 }
 
 PlanModel.initTable();

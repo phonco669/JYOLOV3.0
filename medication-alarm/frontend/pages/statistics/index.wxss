@@ -1,0 +1,299 @@
+.container {
+  padding: 20px;
+  background-color: #F5F7FA;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1E293B;
+  display: block;
+}
+
+.filter-section {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  padding: 4px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #64748B;
+}
+
+.filter-icon {
+  font-size: 10px;
+  color: #64748B;
+  margin-left: 6px;
+}
+
+/* Filter Menu */
+.filter-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 99;
+}
+
+.filter-menu {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    width: 200px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100;
+    padding: 8px 0;
+    overflow: hidden;
+}
+
+.filter-item {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #334155;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.filter-item:last-child {
+    border-bottom: none;
+}
+
+.filter-item.active {
+    background-color: #F0FDF4;
+    color: #4CAF50;
+    font-weight: 500;
+}
+
+.custom-range {
+    padding: 16px;
+    background: #F8FAFC;
+    border-top: 1px solid #E2E8F0;
+    animation: slideDown 0.2s ease-out;
+}
+
+.date-pickers {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.picker-wrapper {
+    flex: 1;
+}
+
+.picker-input {
+    background: white;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 8px 0;
+    font-size: 13px;
+    text-align: center;
+    color: #334155;
+    transition: all 0.2s;
+}
+
+.picker-input.placeholder {
+    color: #94A3B8;
+}
+
+.range-separator {
+    margin: 0 8px;
+    font-size: 12px;
+    color: #64748B;
+}
+
+.btn-confirm {
+    background: #4CAF50;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 20px; /* Pill shape */
+    width: 120px; /* Fixed width to solve "too long" issue */
+    margin: 0 auto; /* Center it */
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+    transition: all 0.2s;
+}
+
+.btn-confirm:active {
+    transform: scale(0.95);
+    background: #43A047;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Overview Chart */
+.overview-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chart-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.circle-chart {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inner-circle {
+  width: 80%;
+  height: 80%;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.percentage {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1E293B;
+}
+
+.label {
+  font-size: 10px;
+  color: #64748B;
+}
+
+.stats-grid {
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+  margin-left: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1E293B;
+}
+
+/* Bar Chart */
+.trend-card {
+  height: 280px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 16px;
+}
+
+.bar-chart-scroll {
+  width: 100%;
+  height: 200px;
+  white-space: nowrap;
+}
+
+.bar-chart {
+  display: inline-flex;
+  align-items: flex-end;
+  height: 100%;
+  padding-right: 20px; /* Padding for end of scroll */
+}
+
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 12px;
+  width: 30px;
+}
+
+.bar-container {
+  height: 150px;
+  width: 8px;
+  background: #F1F5F9;
+  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 100%;
+  background: #94A3B8;
+  border-radius: 4px;
+  transition: height 0.3s ease;
+}
+
+.bar.perfect {
+  background: #4CAF50;
+}
+
+.bar.weight-bar {
+  background: #60A5FA;
+}
+
+.bar-label {
+  margin-top: 8px;
+  font-size: 10px;
+  color: #64748B;
+}
+
+.bar-value {
+  font-size: 10px;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  color: #94A3B8;
+}
+
+.btn-primary {
+  background: #3B82F6;
+  color: white;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 20px;
+}

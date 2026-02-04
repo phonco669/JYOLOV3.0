@@ -1,0 +1,125 @@
+/* components/spotlight-guide/index.wxss */
+.guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  pointer-events: none; /* Allow clicks to pass through holes */
+}
+
+.mask {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.7);
+  left: 0;
+  right: 0;
+  pointer-events: auto; /* Block clicks on mask */
+}
+
+.mask-top {
+  top: 0;
+  width: 100%;
+}
+
+.mask-bottom {
+  bottom: 0;
+  width: 100%;
+}
+
+.mask-left {
+  left: 0;
+}
+
+.mask-right {
+  right: 0;
+  width: auto; /* Override left:0 right:0 default */
+}
+
+.highlight-box {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none; /* Allow clicks to pass through to the target */
+  border: 2px solid #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.pulse-ring {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+
+.tooltip {
+  position: absolute;
+  width: 240px;
+  transition: all 0.3s ease;
+  pointer-events: auto; /* Buttons need clicks */
+}
+
+.tooltip-content {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.tooltip-text {
+  font-size: 14px;
+  color: #1E293B;
+  font-weight: 500;
+  line-height: 1.5;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.tooltip-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-next {
+  background: #2563EB;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Arrows */
+.tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.tooltip.bottom .tooltip-arrow {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 6px 6px 6px;
+  border-color: transparent transparent white transparent;
+}
+
+.tooltip.top .tooltip-arrow {
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px 6px 0 6px;
+  border-color: white transparent transparent transparent;
+}

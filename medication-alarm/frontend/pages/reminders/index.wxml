@@ -1,73 +1,187 @@
 <view class="container">
   <view class="header">
-    <text class="title">提醒事项</text>
-    <text class="subtitle">管理您的所有健康提醒</text>
+    <view class="header-content">
+      <text class="title">健康提醒</text>
+      <text class="subtitle">让每一次坚持更有意义</text>
+    </view>
+    <view class="header-decoration"></view>
   </view>
 
   <view class="tabs">
-    <view class="tab-item {{activeTab === 'pending' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending">待办事项</view>
-    <view class="tab-item {{activeTab === 'completed' ? 'active' : ''}}" bindtap="switchTab" data-tab="completed">已完成</view>
+    <view class="tab-track">
+      <view class="tab-indicator" style="transform: translateX({{activeTab === 'pending' ? '0' : '100%'}})"></view>
+      <view class="tab-item {{activeTab === 'pending' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending">待处理</view>
+      <view class="tab-item {{activeTab === 'completed' ? 'active' : ''}}" bindtap="switchTab" data-tab="completed">已完成</view>
+    </view>
   </view>
 
-  <scroll-view scroll-y class="reminder-list">
+  <scroll-view scroll-y class="reminder-list" enable-flex>
     <block wx:if="{{reminders.length === 0 && !loading}}">
       <view class="empty-state">
-        <text>{{activeTab === 'pending' ? '暂无待办提醒' : '暂无已完成事项'}}</text>
+        <view class="empty-icon">🍃</view>
+        <text class="empty-text">{{activeTab === 'pending' ? '暂无待办，享受当下' : '暂无已完成记录'}}</text>
       </view>
     </block>
     
     <block wx:else>
-      <view class="reminder-card {{item.type}}" wx:for="{{reminders}}" wx:key="id" bindtap="{{activeTab === 'pending' ? 'markDone' : ''}}" data-id="{{item.id}}" data-type="{{item.type}}">
-        <view class="card-left">
-          <view class="icon-box {{item.type}}">
-            <text wx:if="{{item.type === 'stock_low'}}">📦</text>
-            <text wx:elif="{{item.type === 'todo'}}">📝</text>
-            <text wx:else>⏰</text>
+      <view 
+        class="reminder-card {{item.type}} {{activeTab === 'completed' ? 'completed' : ''}}" 
+        wx:for="{{reminders}}" 
+        wx:key="id"
+        style="--accent-color: {{item.medication_color || ''}}"
+      >
+        <view class="card-indicator"></view>
+        
+        <view class="card-body">
+          <view class="card-main">
+            <view class="icon-wrapper">
+              <text wx:if="{{item.type === 'stock_low'}}">📦</text>
+              <text wx:elif="{{item.type === 'todo'}}">📝</text>
+              <text wx:elif="{{item.type === 'follow_up'}}">🏥</text>
+              <text wx:elif="{{item.type === 'medication_missed'}}">⚠️</text>
+              <text wx:else>💊</text>
+            </view>
+            
+            <view class="text-content">
+              <view class="title-row">
+                <text class="card-title">{{item.title}}</text>
+                <text class="priority-tag" wx:if="{{item.priority === 'urgent'}}">紧急</text>
+              </view>
+              <text class="card-detail">{{item.detail}}</text>
+            </view>
           </view>
-          <view class="content">
-            <text class="card-title" style="{{activeTab === 'completed' ? 'text-decoration: line-through; color: #94A3B8;' : ''}}">{{item.title}}</text>
-            <text class="card-detail">{{item.detail}}</text>
-            <text class="card-time" wx:if="{{item.due_time}}">截止: {{item.due_time}}</text>
+          
+          <view class="card-footer" wx:if="{{item.due_time}}">
+             <view class="time-badge">
+               <text class="time-icon">⏰</text>
+               <text>{{item.due_time}}</text>
+             </view>
           </view>
         </view>
-        <view class="card-right">
+
+        <view class="card-actions">
            <block wx:if="{{activeTab === 'pending'}}">
-             <view class="action-btn edit" catchtap="editTodo" data-item="{{item}}" wx:if="{{item.type === 'todo'}}">✏️</view>
-             <view class="priority-dot {{item.priority}}"></view>
+             <view class="action-btn edit" catchtap="editTodo" data-item="{{item}}" wx:if="{{item.type === 'todo'}}">
+                <text class="btn-icon">✏️</text>
+             </view>
+             <view class="action-btn done" catchtap="markDone" data-id="{{item.id}}" data-type="{{item.type}}">
+                <text class="btn-icon">✓</text>
+             </view>
            </block>
            <block wx:else>
-             <view class="action-btn undo" catchtap="undoComplete" data-id="{{item.id}}" data-type="{{item.type}}">↩️</view>
+             <view class="action-btn undo" catchtap="undoComplete" data-id="{{item.id}}" data-type="{{item.type}}">
+                <text class="btn-icon">↩️</text>
+             </view>
            </block>
         </view>
       </view>
     </block>
+
+    <!-- Future Follow-ups Section -->
+    <block wx:if="{{activeTab === 'pending' && futureFollowUps.length > 0}}">
+      <view class="section-divider">
+        <text>未来复诊预告</text>
+      </view>
+      <view 
+        class="reminder-card follow_up future" 
+        wx:for="{{futureFollowUps}}" 
+        wx:key="id"
+        style="--accent-color: {{item.medication_color || ''}}"
+        bindtap="editFollowUp" 
+        data-item="{{item}}"
+      >
+        <view class="card-indicator"></view>
+        <view class="card-body">
+          <view class="card-main">
+            <view class="icon-wrapper"><text>📅</text></view>
+            <view class="text-content">
+              <view class="title-row">
+                <text class="card-title">{{item.title}}</text>
+              </view>
+              <text class="card-detail">{{item.detail}}</text>
+            </view>
+          </view>
+          <view class="card-footer">
+             <view class="time-badge future">
+               <text class="time-icon">⏰</text>
+               <text>{{item.due_time}}</text>
+             </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <view class="list-padding"></view>
   </scroll-view>
 
-  <view class="fab" bindtap="openAddModal" wx:if="{{activeTab === 'pending'}}">
-    <text>+</text>
+  <view class="fab-container" wx:if="{{activeTab === 'pending'}}">
+    <view class="fab" bindtap="openAddModal" id="reminder-add-fab">
+      <text class="fab-icon">+</text>
+    </view>
   </view>
 
-  <!-- Modal -->
-  <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
-  <view class="modal-content" wx:if="{{showModal}}">
-    <view class="modal-header">{{editingId ? '编辑待办' : '新建待办'}}</view>
-    <view class="form-group">
-      <input class="input" placeholder="标题" value="{{newTodo.title}}" data-field="title" bindinput="onInputChange" />
+  <!-- Modal remains largely same but could be styled better via CSS -->
+  <view class="modal-mask {{showModal ? 'visible' : ''}}" bindtap="closeModal"></view>
+  <view class="modal-container {{showModal ? 'visible' : ''}}">
+    <view class="modal-header">
+      <text>{{editingId ? '编辑事项' : '新建事项'}}</text>
+      <view class="close-btn" bindtap="closeModal">×</view>
     </view>
-    <view class="form-group">
-      <textarea class="textarea" placeholder="描述 (可选)" value="{{newTodo.description}}" data-field="description" bindinput="onInputChange"></textarea>
+    <view class="modal-body">
+      <!-- Type Switcher -->
+      <view class="type-switcher" wx:if="{{!editingId}}">
+        <view class="type-btn {{newItemType === 'todo' ? 'active' : ''}}" bindtap="switchNewItemType" data-type="todo">普通待办</view>
+        <view class="type-btn {{newItemType === 'follow_up' ? 'active' : ''}}" bindtap="switchNewItemType" data-type="follow_up">复诊提醒</view>
+      </view>
+
+      <!-- Todo Form -->
+      <block wx:if="{{newItemType === 'todo'}}">
+        <view class="form-group">
+          <text class="label">标题</text>
+          <input class="input" placeholder="例如：购买维生素" value="{{newTodo.title}}" data-field="title" bindinput="onInputChange" />
+        </view>
+        <view class="form-group">
+          <text class="label">详情</text>
+          <textarea class="textarea" placeholder="添加备注..." value="{{newTodo.description}}" data-field="description" bindinput="onInputChange"></textarea>
+        </view>
+      </block>
+
+      <!-- Follow-up Form -->
+      <block wx:if="{{newItemType === 'follow_up'}}">
+        <view class="form-group">
+          <text class="label">医生姓名</text>
+          <input class="input" placeholder="例如：张医生" value="{{newTodo.doctor}}" data-field="doctor" bindinput="onInputChange" />
+        </view>
+        <view class="form-group">
+          <text class="label">就诊地点</text>
+          <input class="input" placeholder="例如：协和医院 皮肤科" value="{{newTodo.location}}" data-field="location" bindinput="onInputChange" />
+        </view>
+        <view class="form-group">
+          <text class="label">备注</text>
+          <textarea class="textarea" placeholder="携带医保卡、之前的检查报告..." value="{{newTodo.note}}" data-field="note" bindinput="onInputChange"></textarea>
+        </view>
+      </block>
+
+      <!-- Common Date/Time Fields -->
+      <view class="form-row">
+        <view class="form-group half">
+           <text class="label">日期</text>
+           <picker mode="date" value="{{newTodo.due_date}}" start="{{today}}" data-field="due_date" bindchange="onInputChange">
+            <view class="picker-box">{{newTodo.due_date || '选择日期'}}</view>
+          </picker>
+        </view>
+        <view class="form-group half">
+           <text class="label">时间</text>
+           <picker mode="time" value="{{newTodo.time}}" data-field="time" bindchange="onInputChange">
+            <view class="picker-box">{{newTodo.time || '选择时间'}}</view>
+          </picker>
+        </view>
+      </view>
     </view>
-    <view class="form-row">
-      <picker mode="date" value="{{newTodo.due_date}}" start="{{today}}" data-field="due_date" bindchange="onInputChange">
-        <view class="picker">{{newTodo.due_date || '选择日期'}}</view>
-      </picker>
-      <picker mode="time" value="{{newTodo.time}}" data-field="time" bindchange="onInputChange">
-        <view class="picker">{{newTodo.time || '选择时间'}}</view>
-      </picker>
-    </view>
-    <view class="modal-actions">
-      <button class="btn cancel" bindtap="closeModal">取消</button>
-      <button class="btn confirm" bindtap="submitTodo">保存</button>
+    <view class="modal-footer">
+      <button class="btn-cancel" bindtap="closeModal">取消</button>
+      <button class="btn-confirm" bindtap="saveTodo">保存</button>
     </view>
   </view>
+  <spotlight-guide id="spotlight" />
 </view>

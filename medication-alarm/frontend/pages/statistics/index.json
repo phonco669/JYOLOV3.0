@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "健康统计",
+  "usingComponents": {
+    "spotlight-guide": "../../components/spotlight-guide/index"
+  }
+}

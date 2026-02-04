@@ -1,7 +1,7 @@
 <view class="container">
   <view class="header">
     <text class="page-title">我的药品</text>
-    <view class="add-btn-wrapper" bindtap="goToAdd">
+    <view class="add-btn-wrapper" bindtap="goToAdd" id="add-med-btn">
       <text class="add-icon">+</text>
       <text>添加</text>
     </view>
@@ -21,7 +21,7 @@
       <block wx:for="{{medications}}" wx:key="id">
         <view class="med-card">
           <view class="med-color-strip" style="background-color: {{item.color || '#4CAF50'}}"></view>
-          <view class="med-content">
+          <view class="med-content" bindtap="goToEdit" bindlongpress="showActionSheet" data-id="{{item.id}}" data-name="{{item.name}}">
             <view class="med-main">
               <text class="med-name">{{item.name}}</text>
               <text class="med-dosage">每次 {{item.dosage}} {{item.unit}}</text>
@@ -30,9 +30,12 @@
               <text class="stock-label">剩余</text>
               <text class="stock-num {{item.stock < 10 ? 'warning' : ''}}">{{item.stock}}</text>
             </view>
+            <view class="med-edit-icon">✎</view>
           </view>
         </view>
       </block>
     </block>
   </view>
+
+  <spotlight-guide run="{{runGuide}}" steps="{{guideSteps}}" bind:complete="onGuideComplete" />
 </view>

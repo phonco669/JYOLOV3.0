@@ -8,6 +8,9 @@ export interface Record {
   taken_at: string;
   status: 'taken' | 'skipped';
   dosage_taken: number;
+  medication_name?: string;
+  medication_unit?: string;
+  medication_color?: string;
 }
 
 export class RecordModel {
@@ -20,6 +23,9 @@ export class RecordModel {
       taken_at DATETIME,
       status TEXT,
       dosage_taken REAL,
+      medication_name TEXT,
+      medication_unit TEXT,
+      medication_color TEXT,
       FOREIGN KEY(user_id) REFERENCES users(id),
       FOREIGN KEY(medication_id) REFERENCES medications(id),
       FOREIGN KEY(plan_id) REFERENCES plans(id)
@@ -27,8 +33,11 @@ export class RecordModel {
       if (err) console.error('Error creating records table', err.message);
       else {
         // Migration: Attempt to add plan_id column if it doesn't exist (for existing dev DBs)
-        db.run(`ALTER TABLE records ADD COLUMN plan_id INTEGER`, (err) => {
-          // Ignore error (likely "duplicate column name" if it already exists)
+        db.run(`ALTER TABLE records ADD COLUMN plan_id INTEGER`, (err) => {});
+        // Add new snapshot columns
+        const columns = ['medication_name', 'medication_unit', 'medication_color'];
+        columns.forEach(col => {
+            db.run(`ALTER TABLE records ADD COLUMN ${col} TEXT`, () => {});
         });
       }
     });
@@ -45,10 +54,10 @@ export class RecordModel {
 
   static create(record: Record): Promise<Record> {
     return new Promise((resolve, reject) => {
-      const { user_id, medication_id, plan_id, taken_at, status, dosage_taken } = record;
+      const { user_id, medication_id, plan_id, taken_at, status, dosage_taken, medication_name, medication_unit, medication_color } = record;
       db.run(
-        'INSERT INTO records (user_id, medication_id, plan_id, taken_at, status, dosage_taken) VALUES (?, ?, ?, ?, ?, ?)',
-        [user_id, medication_id, plan_id, taken_at, status, dosage_taken],
+        'INSERT INTO records (user_id, medication_id, plan_id, taken_at, status, dosage_taken, medication_name, medication_unit, medication_color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [user_id, medication_id, plan_id, taken_at, status, dosage_taken, medication_name, medication_unit, medication_color],
         function(err) {
           if (err) reject(err);
           else resolve({ id: this.lastID, ...record });

@@ -53,17 +53,20 @@
     <block wx:else>
       <view class="schedule-item" wx:for="{{schedule}}" wx:key="plan_id">
         <view class="time-col">
-          <text class="time-text">{{item.time}}</text>
+          <text class="time-text {{item.isOverdue ? 'overdue' : ''}}">{{item.time}}</text>
           <view class="time-line"></view>
         </view>
-        <view class="med-card {{item.status === 'taken' ? 'done' : ''}}">
+        <view class="med-card {{item.status === 'taken' ? 'done' : ''}} {{item.isOverdue ? 'overdue-card' : ''}}">
           <view class="med-info">
             <text class="med-name" style="color: {{item.medication_color}}">{{item.medication_name}}</text>
             <text class="med-dose">{{item.dosage}}{{item.medication_unit}}</text>
+            <block wx:if="{{item.isOverdue}}">
+               <text class="overdue-badge">已超时</text>
+            </block>
           </view>
           <view class="med-action">
             <button 
-              class="btn-take {{item.status === 'taken' ? 'taken' : ''}}" 
+              class="btn-take {{item.status === 'taken' ? 'taken' : ''}} {{item.isOverdue ? 'btn-overdue' : ''}}" 
               bindtap="takeMedication" 
               data-plan-id="{{item.plan_id}}"
               data-medication-id="{{item.medication_id}}"
@@ -90,19 +93,5 @@
     </view>
   </view>
 
-  <!-- Spotlight Guide -->
-  <view class="guide-overlay" wx:if="{{showGuide}}">
-    <view class="guide-mask"></view>
-    <view class="guide-content" style="top: {{guidePosition.top}}px; left: {{guidePosition.left}}px;">
-      <view class="spotlight-circle"></view>
-      <view class="guide-text-box">
-        <text class="guide-title">{{guideSteps[currentStep].title}}</text>
-        <text class="guide-desc">{{guideSteps[currentStep].desc}}</text>
-        <view class="guide-actions">
-           <button class="btn-skip" bindtap="skipGuide">跳过</button>
-           <button class="btn-next" bindtap="nextGuideStep">{{currentStep === guideSteps.length - 1 ? '完成' : '下一步'}}</button>
-        </view>
-      </view>
-    </view>
-  </view>
+  <spotlight-guide run="{{runGuide}}" steps="{{guideSteps}}" bind:complete="onGuideComplete" bind:next="onGuideComplete" />
 </view>
