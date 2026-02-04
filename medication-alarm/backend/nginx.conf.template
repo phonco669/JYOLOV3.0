@@ -1,0 +1,43 @@
+
+# Nginx Configuration for Medication Alarm
+# 路径: /etc/nginx/conf.d/jyolo.conf
+
+# HTTP -> HTTPS Redirect
+server {
+    listen 80;
+    server_name www.jyolo.com.cn;
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS Server
+server {
+    listen 443 ssl;
+    server_name www.jyolo.com.cn;
+
+    # SSL Configuration (请确保路径正确)
+    ssl_certificate /etc/nginx/certs/www.jyolo.com.cn.pem;
+    ssl_certificate_key /etc/nginx/certs/www.jyolo.com.cn.key;
+    
+    ssl_session_timeout 5m;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    # API Proxy
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Static Files (Optional: If you want to serve a landing page)
+    location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+    }
+}
