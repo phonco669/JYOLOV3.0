@@ -37,7 +37,7 @@ Page({
       url: `${API_BASE}/body-states`,
       method: 'POST',
       header: {
-        'x-user-id': app.globalData.user ? app.globalData.user.id : 1
+        ...app.getAuthHeader()
       },
       data: {
         date,

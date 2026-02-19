@@ -30,7 +30,7 @@
 
   <block wx:if="{{!loading && stats}}">
     <!-- Overview Card -->
-    <view class="card overview-card">
+    <view id="stats-overview" class="card overview-card">
       <view class="chart-container">
         <view class="circle-chart" style="background: conic-gradient(#4CAF50 {{stats.overview.percentage}}%, #E2E8F0 0);">
           <view class="inner-circle">
@@ -82,10 +82,23 @@
       </scroll-view>
     </view>
 
-    <!-- Actions -->
     <button class="btn-primary" bindtap="exportPDF">
         📄 导出健康报告 (PDF)
     </button>
+
+    <view class="card qr-card-section">
+      <view class="card-title">支持作者</view>
+      <view class="qr-grid">
+        <view class="qr-item">
+          <image class="qr-image" src="/assets/Rewards_code.png" mode="aspectFit"></image>
+          <text class="qr-label">打赏作者</text>
+        </view>
+        <view class="qr-item">
+          <image class="qr-image" src="/assets/Add_Author_code.png" mode="aspectFit"></image>
+          <text class="qr-label">添加作者</text>
+        </view>
+      </view>
+    </view>
 
   </block>
   

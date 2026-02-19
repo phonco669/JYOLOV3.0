@@ -14,7 +14,8 @@ export interface FollowUp {
 
 export class FollowUpModel {
   static initTable() {
-    db.run(`CREATE TABLE IF NOT EXISTS follow_ups (
+    db.run(
+      `CREATE TABLE IF NOT EXISTS follow_ups (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
       date TEXT,
@@ -25,9 +26,11 @@ export class FollowUpModel {
       status TEXT DEFAULT 'pending',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(user_id) REFERENCES users(id)
-    )`, (err) => {
-      if (err) console.error('Error creating follow_ups table', err.message);
-    });
+    )`,
+      (err) => {
+        if (err) console.error('Error creating follow_ups table', err.message);
+      },
+    );
   }
 
   static findAllByUserId(userId: number): Promise<FollowUp[]> {
@@ -45,11 +48,51 @@ export class FollowUpModel {
       db.run(
         'INSERT INTO follow_ups (user_id, date, time, location, doctor, note, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
         [user_id, date, time, location, doctor, note, status],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve({ id: this.lastID, ...followUp });
-        }
+        },
       );
+    });
+  }
+
+  static update(id: number, updates: Partial<FollowUp>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const fields: string[] = [];
+      const values: unknown[] = [];
+
+      if (updates.date) {
+        fields.push('date = ?');
+        values.push(updates.date);
+      }
+      if (updates.time) {
+        fields.push('time = ?');
+        values.push(updates.time);
+      }
+      if (updates.location !== undefined) {
+        fields.push('location = ?');
+        values.push(updates.location);
+      }
+      if (updates.doctor) {
+        fields.push('doctor = ?');
+        values.push(updates.doctor);
+      }
+      if (updates.note !== undefined) {
+        fields.push('note = ?');
+        values.push(updates.note);
+      }
+
+      if (fields.length === 0) {
+        resolve();
+        return;
+      }
+
+      values.push(id);
+
+      db.run(`UPDATE follow_ups SET ${fields.join(', ')} WHERE id = ?`, values, (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
   }
 

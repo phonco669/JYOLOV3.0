@@ -3,10 +3,9 @@ const app = getApp();
 
 const request = (options) => {
   return new Promise((resolve, reject) => {
-    const userId = app.globalData.user ? app.globalData.user.id : 1;
     wx.request({
       ...options,
-      header: { 'x-user-id': userId, ...options.header },
+      header: { ...app.getAuthHeader(), ...options.header },
       success: (res) => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
           resolve(res.data);
@@ -204,14 +203,16 @@ Page({
       const item = e.currentTarget.dataset.item;
       this.setData({
           showModal: true,
-          editingId: item.raw_id, // Use raw ID for API
+          editingId: item.id,
           newItemType: 'follow_up',
-          newFollowUp: {
+          newTodo: {
+              title: '',
+              description: '',
+              due_date: item.date,
+              time: item.time,
               doctor: item.doctor,
               location: item.location,
-              note: item.note,
-              date: item.date,
-              time: item.time
+              note: item.note
           }
       });
   },
@@ -294,16 +295,33 @@ Page({
 
     try {
       if (editingId) {
-        // Update logic
-        const id = editingId.split('-')[1];
-        if (newItemType === 'todo') {
-             // Existing update todo logic if API supports it (assuming POST/PUT)
-             // For this demo, maybe just recreate or assume update endpoint exists
-             // Current code didn't show update endpoint usage in Read output, 
-             // but let's assume standard REST or skip complex edit for now and focus on Add
-             // If original code didn't have saveTodo implementation fully shown, I'll write a robust one.
+        let idStr = String(editingId);
+        if (idStr.includes('-')) {
+          idStr = idStr.split('-')[1];
         }
-        // ... (Edit implementation omitted for brevity unless requested, focusing on Add as per plan)
+        if (newItemType === 'todo') {
+          await request({
+            url: `${API_BASE}/todos/${idStr}`,
+            method: 'PUT',
+            data: {
+              title: newTodo.title,
+              description: newTodo.description,
+              due_date: `${newTodo.due_date} ${newTodo.time}`
+            }
+          });
+        } else {
+          await request({
+            url: `${API_BASE}/followups/${idStr}`,
+            method: 'PUT',
+            data: {
+              doctor: newTodo.doctor,
+              location: newTodo.location,
+              date: newTodo.due_date,
+              time: newTodo.time,
+              note: newTodo.note
+            }
+          });
+        }
       } else {
         // Create Logic
         if (newItemType === 'todo') {
@@ -313,10 +331,17 @@ Page({
                 data: {
                     title: newTodo.title,
                     description: newTodo.description,
-                    due_date: newTodo.due_date,
-                    time: newTodo.time
+                    due_date: `${newTodo.due_date} ${newTodo.time}`
                 }
             });
+            try {
+              const { scheduleTodoReminder } = require('../../utils/subscription.js');
+              await scheduleTodoReminder({
+                title: newTodo.title,
+                datetime: `${newTodo.due_date} ${newTodo.time}`,
+                description: newTodo.description
+              });
+            } catch (e) { console.warn('scheduleTodoReminder skipped', e); }
         } else {
             await request({
                 url: `${API_BASE}/followups`,
@@ -329,6 +354,15 @@ Page({
                     note: newTodo.note
                 }
             });
+            try {
+              const { scheduleFollowUpReminder } = require('../../utils/subscription.js');
+              await scheduleFollowUpReminder({
+                date: newTodo.due_date,
+                time: newTodo.time,
+                location: newTodo.location,
+                doctor: newTodo.doctor
+              });
+            } catch (e) { console.warn('scheduleFollowUpReminder skipped', e); }
         }
       }
 

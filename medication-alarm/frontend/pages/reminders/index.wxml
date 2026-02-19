@@ -61,7 +61,7 @@
 
         <view class="card-actions">
            <block wx:if="{{activeTab === 'pending'}}">
-             <view class="action-btn edit" catchtap="editTodo" data-item="{{item}}" wx:if="{{item.type === 'todo'}}">
+             <view class="action-btn edit" catchtap="editTodo" data-item="{{item}}" wx:if="{{item.type === 'todo' || item.type === 'follow_up'}}">
                 <text class="btn-icon">✏️</text>
              </view>
              <view class="action-btn done" catchtap="markDone" data-id="{{item.id}}" data-type="{{item.type}}">

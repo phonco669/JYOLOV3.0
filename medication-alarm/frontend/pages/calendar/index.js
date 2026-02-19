@@ -112,7 +112,7 @@ Page({
 
     wx.request({
       url: `${API_BASE}/plans/monthly?start=${start}&end=${end}&refDate=${today}`,
-      header: { 'x-user-id': app.globalData.user ? app.globalData.user.id : 1 },
+      header: app.getAuthHeader(),
       success: (res) => {
         if (res.statusCode === 200) {
           this.setData({ statusMap: res.data }, () => {
@@ -192,7 +192,7 @@ Page({
   fetchDailyDetails(date) {
       wx.request({
           url: `${API_BASE}/plans/daily?date=${date}`,
-          header: { 'x-user-id': app.globalData.user ? app.globalData.user.id : 1 },
+          header: app.getAuthHeader(),
           success: (res) => {
               if (res.statusCode === 200) {
                   this.setData({ selectedDaySchedule: res.data });

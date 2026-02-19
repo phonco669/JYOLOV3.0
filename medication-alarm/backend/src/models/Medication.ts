@@ -13,7 +13,8 @@ export interface Medication {
 
 export class MedicationModel {
   static initTable() {
-    db.run(`CREATE TABLE IF NOT EXISTS medications (
+    db.run(
+      `CREATE TABLE IF NOT EXISTS medications (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
       name TEXT,
@@ -23,9 +24,11 @@ export class MedicationModel {
       stock REAL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(user_id) REFERENCES users(id)
-    )`, (err) => {
-      if (err) console.error('Error creating medications table', err.message);
-    });
+    )`,
+      (err) => {
+        if (err) console.error('Error creating medications table', err.message);
+      },
+    );
   }
 
   static findAllByUserId(userId: number): Promise<Medication[]> {
@@ -43,10 +46,10 @@ export class MedicationModel {
       db.run(
         'INSERT INTO medications (user_id, name, dosage, unit, color, stock) VALUES (?, ?, ?, ?, ?, ?)',
         [user_id, name, dosage, unit, color, stock],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve({ id: this.lastID, ...medication });
-        }
+        },
       );
     });
   }
@@ -69,7 +72,7 @@ export class MedicationModel {
         (err) => {
           if (err) reject(err);
           else resolve();
-        }
+        },
       );
     });
   }
@@ -77,11 +80,11 @@ export class MedicationModel {
   // Add update/delete later if needed
   static updateStock(id: number, quantity: number): Promise<void> {
     return new Promise((resolve, reject) => {
-        // Decrease stock by quantity
-        db.run('UPDATE medications SET stock = stock - ? WHERE id = ?', [quantity, id], (err) => {
-            if (err) reject(err);
-            else resolve();
-        });
+      // Decrease stock by quantity
+      db.run('UPDATE medications SET stock = stock - ? WHERE id = ?', [quantity, id], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
   }
 

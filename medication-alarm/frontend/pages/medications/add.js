@@ -106,10 +106,9 @@ Page({
   },
 
   fetchMedicationDetails(id) {
-      const userId = app.globalData.user ? app.globalData.user.id : 1;
       wx.request({
           url: `${API_BASE}/medications/${id}`,
-          header: { 'x-user-id': userId },
+          header: app.getAuthHeader(),
           success: (res) => {
               if (res.statusCode === 200) {
                   const med = res.data;
@@ -145,7 +144,7 @@ Page({
                   // Fetch Plan for this medication
                   wx.request({
                       url: `${API_BASE}/plans/medication/${id}`,
-                      header: { 'x-user-id': userId },
+                      header: app.getAuthHeader(),
                       success: (planRes) => {
                           if (planRes.statusCode === 200 && planRes.data.length > 0) {
                               const plan = planRes.data[0]; // Assuming 1 plan per med for now
@@ -279,7 +278,7 @@ Page({
       url: url,
       method: method,
       header: {
-        'x-user-id': userId
+        ...app.getAuthHeader()
       },
       data: {
         name,
@@ -307,7 +306,7 @@ Page({
             wx.request({
               url: planUrl,
               method: planMethod,
-              header: { 'x-user-id': userId },
+              header: app.getAuthHeader(),
               data: {
                 medication_id: targetMedId,
                 time: this.data.reminderTime,
@@ -316,6 +315,29 @@ Page({
                 end_date: '2099-12-31'
               },
               success: (planRes) => {
+                // 请求订阅并在本地调度一次最近的提醒
+                try {
+                  const { scheduleMedicationReminder } = require('../../utils/subscription.js');
+                  // 计算下一次提醒时间（如果今天该时间已过，则约到明天）
+                  const now = new Date();
+                  const todayStr = now.toISOString().split('T')[0];
+                  const nextDate = (() => {
+                    if (this.data.startDate > todayStr) return this.data.startDate;
+                    const hhmm = this.data.reminderTime;
+                    const nowHM = now.toTimeString().slice(0,5);
+                    return (hhmm > nowHM) ? todayStr : new Date(now.getTime() + 86400000).toISOString().split('T')[0];
+                  })();
+                  scheduleMedicationReminder({
+                    name,
+                    dosage: this.data.dosageMode === 'fixed' ? this.data.fixedDosage : this.data.alternateDosages.join(','),
+                    unit,
+                    stock: parseFloat(stock) || 0,
+                    date: nextDate,
+                    time: this.data.reminderTime
+                  });
+                } catch (err) {
+                  console.warn('scheduleMedicationReminder failed or skipped', err);
+                }
                 wx.showToast({ title: '保存成功' });
                 setTimeout(() => { wx.navigateBack(); }, 1500);
               },

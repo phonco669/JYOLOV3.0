@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { FollowUpModel, FollowUp } from '../models/FollowUp';
 
-const getUserId = (req: Request): number | null => {
-  const userId = req.headers['x-user-id'];
-  return userId ? parseInt(userId as string, 10) : null;
-};
+// const getUserId = (req: Request): number | null => {
+//   const userId = req.headers['x-user-id'];
+//   return userId ? parseInt(userId as string, 10) : null;
+// };
 
 export const getFollowUps = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
@@ -19,7 +19,7 @@ export const getFollowUps = async (req: Request, res: Response) => {
 };
 
 export const createFollowUp = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const { doctor, location, date, time, note } = req.body;
@@ -35,7 +35,7 @@ export const createFollowUp = async (req: Request, res: Response) => {
       date,
       time,
       note: note || '',
-      status: 'pending'
+      status: 'pending',
     };
     const newFollowUp = await FollowUpModel.create(followUp);
     res.status(201).json(newFollowUp);
@@ -44,18 +44,39 @@ export const createFollowUp = async (req: Request, res: Response) => {
   }
 };
 
+export const updateFollowUp = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+  const { id } = req.params;
+  const { doctor, location, date, time, note } = req.body;
+
+  try {
+    await FollowUpModel.update(Number(id), {
+      doctor,
+      location,
+      date,
+      time,
+      note,
+    });
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 export const updateFollowUpStatus = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { status } = req.body;
+  const { id } = req.params;
+  const { status } = req.body;
 
-    if (!['pending', 'completed'].includes(status)) {
-        return res.status(400).json({ error: 'Invalid status' });
-    }
+  if (!['pending', 'completed'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
 
-    try {
-        await FollowUpModel.updateStatus(Number(id), status);
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error' });
-    }
+  try {
+    await FollowUpModel.updateStatus(Number(id), status);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
 };

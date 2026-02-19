@@ -13,7 +13,8 @@ export interface Plan {
 
 export class PlanModel {
   static initTable() {
-    db.run(`CREATE TABLE IF NOT EXISTS plans (
+    db.run(
+      `CREATE TABLE IF NOT EXISTS plans (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
       medication_id INTEGER,
@@ -24,9 +25,11 @@ export class PlanModel {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(user_id) REFERENCES users(id),
       FOREIGN KEY(medication_id) REFERENCES medications(id)
-    )`, (err) => {
-      if (err) console.error('Error creating plans table', err.message);
-    });
+    )`,
+      (err) => {
+        if (err) console.error('Error creating plans table', err.message);
+      },
+    );
   }
 
   static findAllByUserId(userId: number): Promise<Plan[]> {
@@ -44,10 +47,10 @@ export class PlanModel {
       db.run(
         'INSERT INTO plans (user_id, medication_id, time, frequency, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)',
         [user_id, medication_id, time, frequency, start_date, end_date],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve({ id: this.lastID, ...plan });
-        }
+        },
       );
     });
   }
@@ -79,7 +82,7 @@ export class PlanModel {
         (err) => {
           if (err) reject(err);
           else resolve();
-        }
+        },
       );
     });
   }

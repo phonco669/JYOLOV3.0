@@ -15,7 +15,8 @@ export interface Record {
 
 export class RecordModel {
   static initTable() {
-    db.run(`CREATE TABLE IF NOT EXISTS records (
+    db.run(
+      `CREATE TABLE IF NOT EXISTS records (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
       medication_id INTEGER,
@@ -29,18 +30,24 @@ export class RecordModel {
       FOREIGN KEY(user_id) REFERENCES users(id),
       FOREIGN KEY(medication_id) REFERENCES medications(id),
       FOREIGN KEY(plan_id) REFERENCES plans(id)
-    )`, (err) => {
-      if (err) console.error('Error creating records table', err.message);
-      else {
-        // Migration: Attempt to add plan_id column if it doesn't exist (for existing dev DBs)
-        db.run(`ALTER TABLE records ADD COLUMN plan_id INTEGER`, (err) => {});
-        // Add new snapshot columns
-        const columns = ['medication_name', 'medication_unit', 'medication_color'];
-        columns.forEach(col => {
-            db.run(`ALTER TABLE records ADD COLUMN ${col} TEXT`, () => {});
-        });
-      }
-    });
+    )`,
+      (err) => {
+        if (err) console.error('Error creating records table', err.message);
+        else {
+          // Migration: Attempt to add plan_id column if it doesn't exist (for existing dev DBs)
+          db.run(`ALTER TABLE records ADD COLUMN plan_id INTEGER`, (_err) => {
+            /* ignore error */
+          });
+          // Add new snapshot columns
+          const columns = ['medication_name', 'medication_unit', 'medication_color'];
+          columns.forEach((col) => {
+            db.run(`ALTER TABLE records ADD COLUMN ${col} TEXT`, (_err) => {
+              /* ignore error */
+            });
+          });
+        }
+      },
+    );
   }
 
   static findAllByUserId(userId: number): Promise<Record[]> {
@@ -54,14 +61,34 @@ export class RecordModel {
 
   static create(record: Record): Promise<Record> {
     return new Promise((resolve, reject) => {
-      const { user_id, medication_id, plan_id, taken_at, status, dosage_taken, medication_name, medication_unit, medication_color } = record;
+      const {
+        user_id,
+        medication_id,
+        plan_id,
+        taken_at,
+        status,
+        dosage_taken,
+        medication_name,
+        medication_unit,
+        medication_color,
+      } = record;
       db.run(
         'INSERT INTO records (user_id, medication_id, plan_id, taken_at, status, dosage_taken, medication_name, medication_unit, medication_color) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [user_id, medication_id, plan_id, taken_at, status, dosage_taken, medication_name, medication_unit, medication_color],
-        function(err) {
+        [
+          user_id,
+          medication_id,
+          plan_id,
+          taken_at,
+          status,
+          dosage_taken,
+          medication_name,
+          medication_unit,
+          medication_color,
+        ],
+        function (err) {
           if (err) reject(err);
           else resolve({ id: this.lastID, ...record });
-        }
+        },
       );
     });
   }

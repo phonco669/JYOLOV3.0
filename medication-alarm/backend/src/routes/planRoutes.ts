@@ -1,5 +1,12 @@
 import express from 'express';
-import { createPlan, listPlans, getDailySchedule, getMonthlyStatus, getPlansByMedication, updatePlan } from '../controllers/planController';
+import {
+  createPlan,
+  listPlans,
+  getDailySchedule,
+  getMonthlyStatus,
+  getPlansByMedication,
+  updatePlan,
+} from '../controllers/planController';
 
 const router = express.Router();
 

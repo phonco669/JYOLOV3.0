@@ -9,6 +9,8 @@
 
 # artifacts
 *.tar.gz
+/medication-alarm/backend/dist/
+/medication-alarm/backend/coverage/
 
 # misc
 .DS_Store

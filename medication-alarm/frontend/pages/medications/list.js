@@ -48,14 +48,11 @@ Page({
   },
 
   fetchMedications() {
-    const token = app.globalData.token; // In real app, use token for auth
-    const userId = app.globalData.user ? app.globalData.user.id : 1; // Fallback for dev if auth flow incomplete
-
     wx.request({
       url: `${API_BASE}/medications`,
       method: 'GET',
       header: {
-        'x-user-id': userId // Sending userId in header as per backend controller
+        ...app.getAuthHeader()
       },
       success: (res) => {
         if (res.statusCode === 200) {
@@ -113,11 +110,10 @@ Page({
       confirmColor: '#FF3B30',
       success: (res) => {
         if (res.confirm) {
-          const userId = app.globalData.user ? app.globalData.user.id : 1;
           wx.request({
             url: `${API_BASE}/medications/${id}`,
             method: 'DELETE',
-            header: { 'x-user-id': userId },
+            header: app.getAuthHeader(),
             success: (res) => {
               if (res.statusCode === 200) {
                 wx.showToast({ title: '已删除' });

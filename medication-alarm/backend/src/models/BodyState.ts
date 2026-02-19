@@ -12,7 +12,8 @@ export interface BodyState {
 
 export class BodyStateModel {
   static initTable() {
-    db.run(`CREATE TABLE IF NOT EXISTS body_states (
+    db.run(
+      `CREATE TABLE IF NOT EXISTS body_states (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id INTEGER,
       date TEXT,
@@ -21,9 +22,11 @@ export class BodyStateModel {
       note TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(user_id) REFERENCES users(id)
-    )`, (err) => {
-      if (err) console.error('Error creating body_states table', err.message);
-    });
+    )`,
+      (err) => {
+        if (err) console.error('Error creating body_states table', err.message);
+      },
+    );
   }
 
   static create(state: BodyState): Promise<BodyState> {
@@ -32,10 +35,10 @@ export class BodyStateModel {
       db.run(
         'INSERT INTO body_states (user_id, date, symptom, weight, note) VALUES (?, ?, ?, ?, ?)',
         [user_id, date, symptom, weight, note],
-        function(err) {
+        function (err) {
           if (err) reject(err);
           else resolve({ id: this.lastID, ...state });
-        }
+        },
       );
     });
   }
@@ -48,7 +51,7 @@ export class BodyStateModel {
         (err, rows) => {
           if (err) reject(err);
           else resolve(rows as BodyState[]);
-        }
+        },
       );
     });
   }

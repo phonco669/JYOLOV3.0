@@ -2,6 +2,11 @@ const { API_BASE } = require('./config.js');
 
 App({
   onLaunch() {
+    console.log('API_BASE', API_BASE);
+    const token = wx.getStorageSync('auth_token');
+    if (token) {
+      this.globalData.token = token;
+    }
     this.login();
   },
   login() {
@@ -21,6 +26,7 @@ App({
              console.log('Login success', response.data);
              if (response.data.token) {
                  this.globalData.token = response.data.token;
+                 wx.setStorageSync('auth_token', response.data.token);
                  this.globalData.user = response.data.user;
                  if (this.userLoginCallback) {
                    this.userLoginCallback(response.data.user);
@@ -33,6 +39,13 @@ App({
         })
       }
     })
+  },
+  getAuthHeader() {
+    const token = this.globalData.token || wx.getStorageSync('auth_token');
+    if (!token) {
+      return {};
+    }
+    return { Authorization: `Bearer ${token}` };
   },
   globalData: {
     userInfo: null,

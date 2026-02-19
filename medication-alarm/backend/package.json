@@ -6,25 +6,51 @@
   "scripts": {
     "start": "node dist/app.js",
     "build": "tsc",
-    "dev": "ts-node src/app.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "ts-node --transpile-only src/app.ts",
+    "test": "jest --detectOpenHandles",
+    "lint": "eslint --ext .ts,.tsx src/ --report-unused-disable-directives --max-warnings 0",
+    "verify:backend": "ts-node scripts/verify_backend.ts",
+    "verify:dosage": "ts-node scripts/verify_dosage.ts",
+    "verify:edge-cases": "ts-node scripts/verify_edge_cases.ts",
+    "verify:full-flow": "ts-node scripts/verify_full_flow.ts",
+    "verify:monthly-logic": "ts-node scripts/verify_monthly_logic.ts",
+    "verify:reminders": "ts-node scripts/verify_reminders.ts",
+    "verify:reminders-agg": "ts-node scripts/verify_reminders_aggregation.ts",
+    "verify:us003": "ts-node scripts/verify_us003.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.1.0",
     "axios": "^1.13.4",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "pdfkit": "^0.17.2",
-    "sqlite3": "^5.1.7",
+    "sqlite3": "^5.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/pdfkit": "^0.17.4",
-    "@types/sqlite3": "^3.1.11"
+    "@types/sqlite3": "^3.1.11",
+    "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "jest": "^30.2.0",
+    "prettier": "^3.8.1",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6"
+  },
+  "overrides": {
+    "tar": "^7.5.9",
+    "minimatch": "^10.2.1"
   }
 }

@@ -16,7 +16,9 @@ Page({
       completed: 0
     },
     runGuide: false,
-    guideSteps: []
+    guideSteps: [],
+    displayName: '朋友',
+    avatarPath: ''
   },
   
   onLoad() {
@@ -26,17 +28,17 @@ Page({
       })
     }
 
-    if (app.globalData.user) {
-      this.setData({
-        userInfo: app.globalData.user,
-        hasUserInfo: true
-      })
-    } else {
-      app.userLoginCallback = res => {
-        this.setData({
-          userInfo: res,
-          hasUserInfo: true
-        })
+    const storedName = wx.getStorageSync('user_nick_name') || '';
+    const storedAvatar = wx.getStorageSync('user_avatar_path') || '';
+
+    this.setData({
+      displayName: storedName || '朋友',
+      avatarPath: storedAvatar,
+      hasUserInfo: !!storedName || !!storedAvatar
+    });
+
+    if (!app.globalData.user) {
+      app.userLoginCallback = () => {
         this.fetchAllData();
       }
     }
@@ -80,8 +82,7 @@ Page({
   },
 
   fetchAllData() {
-    const userId = app.globalData.user ? app.globalData.user.id : 1;
-    const header = { 'x-user-id': userId };
+    const header = app.getAuthHeader();
     
     // 1. Fetch Schedule
     const now = new Date();
@@ -116,7 +117,6 @@ Page({
   takeMedication(e) {
     const { planId, medicationId } = e.currentTarget.dataset;
     const item = this.data.schedule.find(s => s.plan_id === planId);
-    const userId = app.globalData.user ? app.globalData.user.id : 1;
 
     if (!item) return;
 
@@ -130,7 +130,7 @@ Page({
                     wx.request({
                         url: `${API_BASE}/records/${item.record_id}`,
                         method: 'DELETE',
-                        header: { 'x-user-id': userId },
+                        header: app.getAuthHeader(),
                         success: (res) => {
                             if (res.statusCode === 200) {
                                 wx.showToast({ title: '已撤销', icon: 'none' });
@@ -147,7 +147,7 @@ Page({
             url: `${API_BASE}/records`,
             method: 'POST',
             header: {
-                'x-user-id': userId,
+                ...app.getAuthHeader(),
                 'Content-Type': 'application/json'
             },
             data: {
@@ -172,11 +172,28 @@ Page({
       desc: '用于完善会员资料', 
       success: (res) => {
         this.setData({
-          userInfo: res.userInfo,
+          displayName: res.userInfo.nickName || '朋友',
           hasUserInfo: true
         })
+        wx.setStorageSync('user_nick_name', res.userInfo.nickName || '');
       }
     })
+  },
+
+  onAvatarTap() {
+    wx.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const path = res.tempFilePaths[0];
+        this.setData({
+          avatarPath: path,
+          hasUserInfo: true
+        });
+        wx.setStorageSync('user_avatar_path', path);
+      }
+    });
   },
 
   goToMedications() {

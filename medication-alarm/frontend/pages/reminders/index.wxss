@@ -349,7 +349,7 @@ page {
 
 /* FAB */
 .fab-container {
-  position: absolute;
+  position: fixed;
   bottom: 60rpx;
   right: 40rpx;
   z-index: 20;

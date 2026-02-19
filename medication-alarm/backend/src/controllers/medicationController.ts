@@ -3,15 +3,15 @@ import { MedicationModel } from '../models/Medication';
 
 // Helper to get user ID from request (in real app, use middleware to set req.user)
 // For now, we expect userId in headers or body for simplicity in dev phase 1
-const getUserId = (req: Request) => {
-  // In real implementation: return req.user.id;
-  // Temporary: extract from header 'x-user-id'
-  const id = req.headers['x-user-id'];
-  return id ? parseInt(id as string) : null;
-};
+// const getUserId = (req: Request) => {
+//   // In real implementation: return req.user.id;
+//   // Temporary: extract from header 'x-user-id'
+//   const id = req.headers['x-user-id'];
+//   return id ? parseInt(id as string) : null;
+// };
 
 export const listMedications = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
@@ -23,7 +23,7 @@ export const listMedications = async (req: Request, res: Response) => {
 };
 
 export const getMedication = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const medId = parseInt(req.params.id as string);
@@ -40,7 +40,7 @@ export const getMedication = async (req: Request, res: Response) => {
 };
 
 export const deleteMedication = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const medId = parseInt(req.params.id as string);
@@ -58,7 +58,7 @@ export const deleteMedication = async (req: Request, res: Response) => {
 };
 
 export const updateMedication = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const medId = parseInt(req.params.id as string);
@@ -77,7 +77,7 @@ export const updateMedication = async (req: Request, res: Response) => {
 };
 
 export const addMedication = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const { name, dosage, unit, color, stock } = req.body;
@@ -89,7 +89,7 @@ export const addMedication = async (req: Request, res: Response) => {
       dosage,
       unit,
       color,
-      stock
+      stock,
     });
     res.status(201).json(newMed);
   } catch (error) {

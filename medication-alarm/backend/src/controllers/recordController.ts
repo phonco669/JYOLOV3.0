@@ -2,13 +2,13 @@ import { Request, Response } from 'express';
 import { RecordModel } from '../models/Record';
 import { MedicationModel } from '../models/Medication';
 
-const getUserId = (req: Request) => {
-  const id = req.headers['x-user-id'];
-  return id ? parseInt(id as string) : null;
-};
+// const getUserId = (req: Request) => {
+//   const id = req.headers['x-user-id'];
+//   return id ? parseInt(id as string) : null;
+// };
 
 export const listRecords = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   try {
@@ -20,7 +20,7 @@ export const listRecords = async (req: Request, res: Response) => {
 };
 
 export const deleteRecord = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const recordId = parseInt(req.params.id as string);
@@ -32,8 +32,8 @@ export const deleteRecord = async (req: Request, res: Response) => {
 
     // Restore stock if it was taken
     if (record.status === 'taken' && record.dosage_taken > 0) {
-        // Pass negative value to subtract -> double negative = add
-        await MedicationModel.updateStock(record.medication_id, -record.dosage_taken);
+      // Pass negative value to subtract -> double negative = add
+      await MedicationModel.updateStock(record.medication_id, -record.dosage_taken);
     }
 
     await RecordModel.delete(recordId);
@@ -44,7 +44,7 @@ export const deleteRecord = async (req: Request, res: Response) => {
 };
 
 export const createRecord = async (req: Request, res: Response) => {
-  const userId = getUserId(req);
+  const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const { medication_id, plan_id, taken_at, status, dosage_taken } = req.body;
@@ -52,7 +52,7 @@ export const createRecord = async (req: Request, res: Response) => {
   try {
     // Fetch medication details for snapshot
     const medication = await MedicationModel.findById(medication_id);
-    
+
     const newRecord = await RecordModel.create({
       user_id: userId,
       medication_id,
@@ -62,12 +62,12 @@ export const createRecord = async (req: Request, res: Response) => {
       dosage_taken,
       medication_name: medication?.name || 'Unknown',
       medication_unit: medication?.unit || '',
-      medication_color: medication?.color || '#ccc'
+      medication_color: medication?.color || '#ccc',
     });
 
     // Auto-deduct stock if taken
     if (status === 'taken' && dosage_taken > 0) {
-        await MedicationModel.updateStock(medication_id, dosage_taken);
+      await MedicationModel.updateStock(medication_id, dosage_taken);
     }
 
     res.status(201).json(newRecord);

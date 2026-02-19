@@ -14,9 +14,18 @@
         </view>
       </block>
       <block wx:else>
-        <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+        <view class="avatar-wrapper" bindtap="onAvatarTap">
+          <block wx:if="{{avatarPath}}">
+            <image class="avatar" src="{{avatarPath}}" mode="aspectFill"></image>
+          </block>
+          <block wx:else>
+            <view class="avatar-circle">
+              <text>{{displayName ? displayName[0] : '友'}}</text>
+            </view>
+          </block>
+        </view>
         <view class="greeting">
-          <text class="h1">你好，{{userInfo.nickName}}</text>
+          <text class="h1">你好，{{displayName}}</text>
           <text class="p">祝您身体健康</text>
         </view>
       </block>

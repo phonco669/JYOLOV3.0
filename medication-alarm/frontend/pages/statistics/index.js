@@ -87,18 +87,15 @@ Page({
     wx.request({
       url: url,
       method: 'GET',
-      header: { 'x-user-id': app.globalData.user ? app.globalData.user.id : 1 },
+      header: app.getAuthHeader(),
       success: (res) => {
         if (res.statusCode === 200) {
-          // Process data for charts
           const stats = res.data;
-          // Format percentage
           stats.overview.percentage = Math.round(stats.overview.adherenceRate * 100);
           
-          // Process Body State Data for Visualization (e.g. max weight for scaling)
           if (stats.bodyStates && stats.bodyStates.length > 0) {
              const weights = stats.bodyStates.map(s => s.weight).filter(w => w > 0);
-             const maxWeight = Math.max(...weights, 100); // Default max 100kg if empty
+             const maxWeight = Math.max(...weights, 100);
              
              stats.bodyStates = stats.bodyStates.map(s => ({
                  ...s,
@@ -107,27 +104,30 @@ Page({
              }));
           }
 
-          // Find max for bar chart scaling
           const maxVal = Math.max(...stats.daily.map(d => d.expected));
           
           stats.daily = stats.daily.map(d => ({
             ...d,
-            displayDate: d.date.split('-').slice(1).join('/'), // MM/DD
-            height: maxVal > 0 ? (d.taken / maxVal) * 100 : 0, // Height percentage
+            displayDate: d.date.split('-').slice(1).join('/'),
+            height: maxVal > 0 ? (d.taken / maxVal) * 100 : 0,
             isPerfect: d.taken >= d.expected && d.expected > 0
           }));
 
           this.setData({ stats, loading: false }, () => {
-              // Auto scroll to the end
               if (stats.daily.length > 0) {
                   this.setData({ toView: `day-${stats.daily.length - 1}` });
               }
           });
+        } else {
+          console.error('Stats request failed', res);
+          wx.showToast({ title: '统计加载失败', icon: 'none' });
+          this.setData({ loading: false, stats: null });
         }
       },
       fail: (err) => {
-        console.error(err);
-        this.setData({ loading: false });
+        console.error('Stats request error', err);
+        wx.showToast({ title: '统计请求异常', icon: 'none' });
+        this.setData({ loading: false, stats: null });
       }
     });
   },
@@ -160,7 +160,7 @@ Page({
     
     wx.downloadFile({
       url: `${API_BASE}/statistics/export`,
-      header: { 'x-user-id': app.globalData.user ? app.globalData.user.id : 1 },
+      header: app.getAuthHeader(),
       success: (res) => {
         wx.hideLoading();
         if (res.statusCode === 200) {
