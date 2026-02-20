@@ -1,11 +1,6 @@
 import { Request, Response } from 'express';
 import { FollowUpModel, FollowUp } from '../models/FollowUp';
 
-// const getUserId = (req: Request): number | null => {
-//   const userId = req.headers['x-user-id'];
-//   return userId ? parseInt(userId as string, 10) : null;
-// };
-
 export const getFollowUps = async (req: Request, res: Response) => {
   const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });

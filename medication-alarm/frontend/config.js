@@ -1,10 +1,17 @@
-let API_BASE = 'http://192.168.1.36:3000/api';
+// 生产环境域名 (部署后请修改此处)
+const PROD_DOMAIN = 'https://your-api-domain.com'; 
+
+let API_BASE = `${PROD_DOMAIN}/api`;
+
 try {
   const info = wx.getSystemInfoSync();
+  // 如果在开发者工具中，默认连接本地开发环境
   if (info && info.platform === 'devtools') {
     API_BASE = 'http://localhost:3000/api';
   }
-} catch (e) {}
+} catch (e) {
+  console.error('Failed to get system info:', e);
+}
 
 module.exports = {
   API_BASE

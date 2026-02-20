@@ -1,7 +1,9 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import helmet from 'helmet';
+import cors from 'cors';
 
 const envPath = path.resolve(__dirname, '../.env');
 try {
@@ -34,16 +36,21 @@ if (!process.env.JWT_SECRET) {
   console.log('JWT_SECRET loaded', process.env.JWT_SECRET?.length);
 }
 
+// Security Middleware
+app.use(helmet());
+app.use(cors());
 app.use(express.json());
 
 // Logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url} - IP: ${req.ip}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url} - IP: ${req.ip}`);
+  }
   next();
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send('Medication Alarm API is running');
 });
 
 app.use('/api/auth', authRoutes); // 认证路由不需要 Token
@@ -59,7 +66,18 @@ app.use('/api/followups', authenticateToken, followUpRoutes);
 app.use('/api/statistics', authenticateToken, statisticsRoutes);
 app.use('/api/subscriptions', authenticateToken, subscriptionRoutes);
 
+// Global Error Handler
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    error: {
+      message: err.message || 'Internal Server Error',
+      ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {})
+    }
+  });
+});
+
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Server is running on http://0.0.0.0:${port}`);
+  console.log(`Server is running on http://0.0.0.0:${port} in ${process.env.NODE_ENV || 'development'} mode`);
 });
 startSubscriptionDispatcher();
