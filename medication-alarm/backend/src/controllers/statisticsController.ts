@@ -35,12 +35,10 @@ export const getAdherenceStats = async (req: Request, res: Response) => {
 
   try {
     const today = new Date();
-    // Default: Last 30 days
     let start = new Date();
     start.setDate(today.getDate() - 30);
     let end = today;
 
-    // Parse query params if present
     if (req.query.startDate) {
       start = new Date(req.query.startDate as string);
     }
@@ -48,64 +46,60 @@ export const getAdherenceStats = async (req: Request, res: Response) => {
       end = new Date(req.query.endDate as string);
     }
 
-    // Use toUserDateStr to get local date strings for range
     const startDateStr = toUserDateStr(start.toISOString());
     const endDateStr = toUserDateStr(end.toISOString());
 
+    // 优化：只查询当前用户和范围内的记录 (如果有相应 Model 方法的话)
+    // 暂时保持逻辑，但通过对象映射优化查找速度
     const plans = await PlanModel.findAllByUserId(userId);
     const records = await RecordModel.findAllByUserId(userId);
     const bodyStates = await BodyStateModel.findByDateRange(userId, startDateStr, endDateStr);
 
-    // Filter records in range (using User Date)
-    const rangeRecords = records.filter((r) => {
-      const date = toUserDateStr(r.taken_at);
-      return date >= startDateStr && date <= endDateStr;
+    // 将 records 转换为按日期分组的 Map，避免在循环中重复 filter
+    const recordsByDate: { [key: string]: any[] } = {};
+    records.forEach(r => {
+      const d = toUserDateStr(r.taken_at);
+      if (d >= startDateStr && d <= endDateStr) {
+        if (!recordsByDate[d]) recordsByDate[d] = [];
+        recordsByDate[d].push(r);
+      }
     });
 
     const dailyStats: DailyStat[] = [];
-    const dates: string[] = []; // 指定类型为 string[]
     const curr = new Date(startDateStr);
     const last = new Date(endDateStr);
-
-    while (curr <= last) {
-      dates.push(curr.toISOString().split('T')[0]);
-      curr.setDate(curr.getDate() + 1);
-    }
 
     let totalExpected = 0;
     let totalTaken = 0;
 
-    dates.forEach((date) => {
+    while (curr <= last) {
+      const date = curr.toISOString().split('T')[0];
       let dailyExpected = 0;
-      let dailyTaken = 0;
-
+      
       // Calculate expected
       plans.forEach((plan) => {
         if (plan.start_date <= date && (!plan.end_date || plan.end_date >= date)) {
           const times = plan.time.split(',').filter((t) => t.trim());
           let isDue = true;
 
-          // Frequency check
           if (plan.frequency === 'weekly') {
-            const startDay = new Date(plan.start_date).getDay();
+            const planStartDate = new Date(plan.start_date);
             const currentDay = new Date(date).getDay();
-            if (startDay !== currentDay) isDue = false;
+            if (planStartDate.getDay() !== currentDay) isDue = false;
           } else if (plan.frequency === 'every_other_day') {
-            const start = new Date(plan.start_date).getTime();
-            const current = new Date(date).getTime();
-            const diffDays = Math.floor((current - start) / (1000 * 3600 * 24));
+            const startMs = new Date(plan.start_date).getTime();
+            const currentMs = new Date(date).getTime();
+            const diffDays = Math.floor((currentMs - startMs) / (1000 * 3600 * 24));
             if (diffDays % 2 !== 0) isDue = false;
           }
-          // 'daily' matches everything (default)
 
-          if (isDue) {
-            dailyExpected += times.length;
-          }
+          if (isDue) dailyExpected += times.length;
         }
       });
 
-      // Calculate taken
-      dailyTaken = rangeRecords.filter((r) => toUserDateStr(r.taken_at) === date && r.status === 'taken').length;
+      // 直接从 Map 中读取，大幅提升性能
+      const dailyRecords = recordsByDate[date] || [];
+      const dailyTaken = dailyRecords.filter(r => r.status === 'taken').length;
 
       dailyStats.push({
         date,
@@ -116,7 +110,9 @@ export const getAdherenceStats = async (req: Request, res: Response) => {
 
       totalExpected += dailyExpected;
       totalTaken += dailyTaken;
-    });
+
+      curr.setDate(curr.getDate() + 1);
+    }
 
     res.json({
       period: { start: startDateStr, end: endDateStr },
@@ -126,11 +122,11 @@ export const getAdherenceStats = async (req: Request, res: Response) => {
         adherenceRate: totalExpected > 0 ? totalTaken / totalExpected : 0,
       },
       daily: dailyStats,
-      bodyStates: bodyStates, // Include body states for trend analysis
+      bodyStates: bodyStates,
     });
   } catch (error) {
-    console.error('Stats error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('[Stats Error]:', error);
+    res.status(500).json({ error: 'Server error while calculating statistics' });
   }
 };
 

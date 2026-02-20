@@ -9,7 +9,8 @@ export const getFollowUps = async (req: Request, res: Response) => {
     const followUps = await FollowUpModel.findAllByUserId(userId);
     res.json(followUps);
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('[Get FollowUps Error]:', error);
+    res.status(500).json({ error: 'Failed to load follow-up reminders' });
   }
 };
 
@@ -32,10 +33,12 @@ export const createFollowUp = async (req: Request, res: Response) => {
       note: note || '',
       status: 'pending',
     };
+    console.log('[Debug] Creating FollowUp:', followUp);
     const newFollowUp = await FollowUpModel.create(followUp);
     res.status(201).json(newFollowUp);
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('[Create FollowUp Error]:', error);
+    res.status(500).json({ error: 'Failed to save follow-up reminder', details: (error as Error).message });
   }
 };
 

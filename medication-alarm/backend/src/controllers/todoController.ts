@@ -36,10 +36,12 @@ export const createTodo = async (req: Request, res: Response) => {
       type: type || 'custom',
       status: 'pending',
     };
+    console.log('[Debug] Creating Todo:', todo);
     const newTodo = await TodoModel.create(todo);
     res.status(201).json(newTodo);
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('[Create Todo Error]:', error);
+    res.status(500).json({ error: 'Failed to save todo', details: (error as Error).message });
   }
 };
 
