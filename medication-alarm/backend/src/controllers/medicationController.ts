@@ -81,6 +81,7 @@ export const addMedication = async (req: Request, res: Response) => {
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const { name, dosage, unit, color, stock } = req.body;
+  console.log('[Debug] Adding Medication:', { userId, name, dosage, unit, color, stock });
 
   try {
     const newMed = await MedicationModel.create({
@@ -93,6 +94,7 @@ export const addMedication = async (req: Request, res: Response) => {
     });
     res.status(201).json(newMed);
   } catch (error) {
-    res.status(500).json({ error: 'Database error' });
+    console.error('[Add Medication Error]:', error);
+    res.status(500).json({ error: 'Database error', details: (error as any).message });
   }
 };
