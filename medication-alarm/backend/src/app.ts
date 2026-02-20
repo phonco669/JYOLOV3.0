@@ -6,12 +6,6 @@ import helmet from 'helmet';
 import cors from 'cors';
 
 const envPath = path.resolve(__dirname, '../.env');
-try {
-  const content = fs.readFileSync(envPath, 'utf8');
-  console.log('ENV path:', envPath, 'size:', content.length);
-} catch (e) {
-  console.warn('ENV read failed');
-}
 dotenv.config({ path: envPath, override: true });
 
 import authRoutes from './routes/authRoutes';
@@ -29,12 +23,6 @@ import { startSubscriptionDispatcher } from './services/subscriptionDispatcher';
 
 const app = express();
 const port = parseInt(process.env.PORT || '3000', 10);
-
-if (!process.env.JWT_SECRET) {
-  console.warn('JWT_SECRET missing at startup');
-} else {
-  console.log('JWT_SECRET loaded', process.env.JWT_SECRET?.length);
-}
 
 // Security Middleware
 app.use(helmet());

@@ -1,11 +1,6 @@
 import { Request, Response } from 'express';
 import { TodoModel, Todo } from '../models/Todo';
 
-// const getUserId = (req: Request): number | null => {
-//   const userId = req.headers['x-user-id'];
-//   return userId ? parseInt(userId as string, 10) : null;
-// };
-
 export const listTodos = async (req: Request, res: Response) => {
   const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
@@ -36,7 +31,6 @@ export const createTodo = async (req: Request, res: Response) => {
       type: type || 'custom',
       status: 'pending',
     };
-    console.log('[Debug] Creating Todo:', todo);
     const newTodo = await TodoModel.create(todo);
     res.status(201).json(newTodo);
   } catch (error) {

@@ -1,15 +1,6 @@
 import { Request, Response } from 'express';
 import { MedicationModel } from '../models/Medication';
 
-// Helper to get user ID from request (in real app, use middleware to set req.user)
-// For now, we expect userId in headers or body for simplicity in dev phase 1
-// const getUserId = (req: Request) => {
-//   // In real implementation: return req.user.id;
-//   // Temporary: extract from header 'x-user-id'
-//   const id = req.headers['x-user-id'];
-//   return id ? parseInt(id as string) : null;
-// };
-
 export const listMedications = async (req: Request, res: Response) => {
   const userId = req.user.id;
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
@@ -81,7 +72,6 @@ export const addMedication = async (req: Request, res: Response) => {
   if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
   const { name, dosage, unit, color, stock } = req.body;
-  console.log('[Debug] Adding Medication:', { userId, name, dosage, unit, color, stock });
 
   try {
     const newMed = await MedicationModel.create({

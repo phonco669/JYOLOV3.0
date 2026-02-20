@@ -33,7 +33,6 @@ export const createFollowUp = async (req: Request, res: Response) => {
       note: note || '',
       status: 'pending',
     };
-    console.log('[Debug] Creating FollowUp:', followUp);
     const newFollowUp = await FollowUpModel.create(followUp);
     res.status(201).json(newFollowUp);
   } catch (error) {
