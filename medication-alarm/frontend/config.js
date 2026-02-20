@@ -1,5 +1,5 @@
 // 生产环境域名 (部署后请修改此处)
-const PROD_DOMAIN = 'https://your-api-domain.com'; 
+const PROD_DOMAIN = 'https://jyolo.com.cn'; 
 
 let API_BASE = `${PROD_DOMAIN}/api`;
 
