@@ -113,7 +113,50 @@ server {
 sudo systemctl restart nginx
 ```
 
-## 3. 小程序前端部署 (Frontend Deployment)
+## 3. Docker 一键部署与升级 (Docker Deployment)
+
+如果你希望使用 Docker 进行更简单的管理和一键升级，请按照以下步骤操作：
+
+### 步骤 1: 安装 Docker
+在 ECS 上安装 Docker 和 Docker Compose：
+```bash
+# 安装 Docker
+curl -fsSL https://get.docker.com | bash
+sudo systemctl enable --now docker
+
+# 安装 Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+### 步骤 2: 准备环境
+进入后端目录并根据 `.env.docker` 创建 `.env` 文件：
+```bash
+cd medication-alarm/backend
+cp .env.docker .env
+nano .env # 填入你的 AppID, AppSecret 和 JWT_SECRET
+```
+
+### 步骤 3: 启动服务
+使用 Docker Compose 启动：
+```bash
+docker-compose up -d --build
+```
+
+### 步骤 4: 升级服务
+当代码有更新时，只需执行：
+```bash
+cd /root/medication-alarm
+git pull
+cd medication-alarm/backend
+# 首次部署需要准备环境变量 (如已配置可跳过)
+# cp .env.docker .env
+# nano .env # 确保填入了真实的 AppID 和 JWT_SECRET
+docker-compose up -d --build
+```
+Docker 会自动重新构建镜像并重启容器，数据库数据将通过 Volume 持久化，不会丢失。
+
+## 4. 小程序前端部署 (Frontend Deployment)
 
 ### 步骤 1: 修改 API 地址
 在 `frontend/app.js` 或 `config.js` 中，将 `API_BASE` 修改为生产环境域名:

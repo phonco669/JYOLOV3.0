@@ -1,0 +1,15 @@
+services:
+  medication-backend:
+    build: .
+    container_name: medication-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./medication_alarm.db:/app/medication_alarm.db
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=/app/medication_alarm.db

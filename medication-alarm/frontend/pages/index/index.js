@@ -28,8 +28,10 @@ Page({
       })
     }
 
-    const storedName = wx.getStorageSync('user_nick_name') || '';
-    const storedAvatar = wx.getStorageSync('user_avatar_path') || '';
+    // Initialize from global data or storage
+    const user = app.globalData.user || {};
+    const storedName = user.nickname || wx.getStorageSync('user_nick_name') || '';
+    const storedAvatar = user.avatar_url || wx.getStorageSync('user_avatar_path') || '';
 
     this.setData({
       displayName: storedName || '朋友',
@@ -38,7 +40,14 @@ Page({
     });
 
     if (!app.globalData.user) {
-      app.userLoginCallback = () => {
+      app.userLoginCallback = (user) => {
+        if (user) {
+          this.setData({
+            displayName: user.nickname || this.data.displayName,
+            avatarPath: user.avatar_url || this.data.avatarPath,
+            hasUserInfo: !!user.nickname || !!user.avatar_url || this.data.hasUserInfo
+          });
+        }
         this.fetchAllData();
       }
     }
@@ -171,11 +180,25 @@ Page({
     wx.getUserProfile({
       desc: '用于完善会员资料', 
       success: (res) => {
+        const nickname = res.userInfo.nickName || '朋友';
         this.setData({
-          displayName: res.userInfo.nickName || '朋友',
+          displayName: nickname,
           hasUserInfo: true
         })
-        wx.setStorageSync('user_nick_name', res.userInfo.nickName || '');
+        wx.setStorageSync('user_nick_name', nickname);
+        
+        // Sync with backend
+        wx.request({
+          url: `${API_BASE}/auth/update`,
+          method: 'PUT',
+          header: app.getAuthHeader(),
+          data: { nickname },
+          success: (syncRes) => {
+            if (syncRes.statusCode === 200) {
+              app.globalData.user = syncRes.data.user;
+            }
+          }
+        });
       }
     })
   },
@@ -187,11 +210,25 @@ Page({
       sourceType: ['album', 'camera'],
       success: (res) => {
         const path = res.tempFilePaths[0];
+        // Note: Real world would upload to server first, then save URL. 
+        // For now, we update local and sync the path if backend supports it.
         this.setData({
           avatarPath: path,
           hasUserInfo: true
         });
         wx.setStorageSync('user_avatar_path', path);
+
+        wx.request({
+          url: `${API_BASE}/auth/update`,
+          method: 'PUT',
+          header: app.getAuthHeader(),
+          data: { avatar_url: path }, 
+          success: (syncRes) => {
+            if (syncRes.statusCode === 200) {
+              app.globalData.user = syncRes.data.user;
+            }
+          }
+        });
       }
     });
   },
